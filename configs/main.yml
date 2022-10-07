@@ -1,0 +1,14 @@
+admin-bot:
+  debug: true
+  timeout: 60
+  offset: 0
+  parse_mode: markdown
+  
+public-bot:
+  debug: true
+  timeout: 60
+  offset: 0
+  parse_mode: markdown
+
+heroku:
+  url: ""
