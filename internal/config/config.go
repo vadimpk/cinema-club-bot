@@ -59,18 +59,21 @@ func parseConfigPath(filepath string) error {
 
 func parseEnv(cfg *Config) error {
 
-	viper.SetConfigFile(".env")
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
-
 	if cfg.AdminBot.Debug {
+		viper.SetConfigFile(".env")
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
 		cfg.AdminBot.TOKEN = viper.GetString("TEST_ADMIN_BOT_API_TOKEN")
 	} else {
 		cfg.AdminBot.TOKEN = os.Getenv("ADMIN_BOT_API_TOKEN")
 	}
 
 	if cfg.PublicBot.Debug {
+		viper.SetConfigFile(".env")
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
 		cfg.PublicBot.TOKEN = viper.GetString("TEST_PUBLIC_BOT_API_TOKEN")
 	} else {
 		cfg.PublicBot.TOKEN = os.Getenv("PUBLIC_BOT_API_TOKEN")
