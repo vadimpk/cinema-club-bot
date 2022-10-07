@@ -1,14 +1,14 @@
 admin-bot:
-  debug: true
+  debug: false
   timeout: 60
   offset: 0
   parse_mode: markdown
   
 public-bot:
-  debug: true
+  debug: false
   timeout: 60
   offset: 0
   parse_mode: markdown
 
 heroku:
-  url: ""
+  url: "https://mohyla-cinema-club-bot.herokuapp.com/%s"

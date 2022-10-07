@@ -1,10 +1,12 @@
 package telegram
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vadimpk/cinema-club-bot/internal/config"
-
 	"log"
+	"net/http"
+	"os"
 )
 
 type Bot struct {
@@ -32,9 +34,14 @@ func (b *Bot) Start(cfg *config.Config) error {
 		u := tgbotapi.NewUpdate(0)
 		u.Timeout = cfg.AdminBot.Timeout
 
-		adminUpdates = b.adminBot.GetUpdatesChan(u)
+		adminUpdates, _ = b.adminBot.GetUpdatesChan(u)
 	} else {
-		// set webhooks (heroku)
+		_, err := b.adminBot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(cfg.Heroku.URL, b.adminBot.Token)))
+		if err != nil {
+			return err
+		}
+
+		adminUpdates = b.adminBot.ListenForWebhook("/" + b.adminBot.Token)
 	}
 
 	// if debug - polling
@@ -42,10 +49,22 @@ func (b *Bot) Start(cfg *config.Config) error {
 		u := tgbotapi.NewUpdate(0)
 		u.Timeout = cfg.PublicBot.Timeout
 
-		publicUpdates = b.publicBot.GetUpdatesChan(u)
+		publicUpdates, _ = b.publicBot.GetUpdatesChan(u)
 	} else {
-		// set webhooks (heroku)
+		_, err := b.publicBot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(cfg.Heroku.URL, b.publicBot.Token)))
+		if err != nil {
+			return err
+		}
+
+		publicUpdates = b.publicBot.ListenForWebhook("/" + b.publicBot.Token)
 	}
+
+	go func() {
+		err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	go b.handleUpdates(adminUpdates, b.adminBot)
 	b.handleUpdates(publicUpdates, b.publicBot)
