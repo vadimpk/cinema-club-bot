@@ -1,8 +1,9 @@
 package app
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vadimpk/cinema-club-bot/internal/config"
+	"github.com/vadimpk/cinema-club-bot/internal/handlers/admin"
+	"github.com/vadimpk/cinema-club-bot/internal/handlers/public"
 	"github.com/vadimpk/cinema-club-bot/internal/telegram"
 	"log"
 )
@@ -15,23 +16,22 @@ func Run(configPath string) {
 		log.Fatal(err)
 	}
 
-	adminBot, err := tgbotapi.NewBotAPI(cfg.AdminBot.TOKEN)
+	adminHandler := admin.NewHandler()
+	publicHandler := public.NewHandler()
+
+	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	publicBot, err := tgbotapi.NewBotAPI(cfg.PublicBot.TOKEN)
+	publicBot, err := telegram.Init(cfg.PublicBot, publicHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	adminBot.Debug = cfg.AdminBot.Debug
-	publicBot.Debug = cfg.PublicBot.Debug
+	bots := telegram.NewBots(adminBot, publicBot)
 
-	telegramBot := telegram.NewBot(adminBot, publicBot)
-	telegramBot.SetParseMode(cfg.AdminBot.ParseMode)
-
-	if err := telegramBot.Start(cfg); err != nil {
+	if err := bots.Start(cfg); err != nil {
 		log.Fatal(err)
 	}
 

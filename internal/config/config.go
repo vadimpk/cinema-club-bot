@@ -31,7 +31,7 @@ func Init(configPath string) (*Config, error) {
 	}
 
 	var cfg Config
-	if err := viper.UnmarshalKey("admin-bot", &cfg.AdminBot); err != nil {
+	if err := viper.UnmarshalKey("admin", &cfg.AdminBot); err != nil {
 		return nil, err
 	}
 	if err := viper.UnmarshalKey("public-bot", &cfg.PublicBot); err != nil {
