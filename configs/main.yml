@@ -10,3 +10,6 @@ public-bot:
 
 heroku:
   url: "https://mohyla-cinema-club-bot.herokuapp.com/%s"
+
+redis:
+  url: "localhost"

@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/spf13/viper"
 	"os"
-	"strings"
 )
 
 type (
@@ -11,6 +10,7 @@ type (
 		AdminBot  BotConfig
 		PublicBot BotConfig
 		Heroku    HerokuConfig
+		Redis     RedisConfig
 	}
 
 	BotConfig struct {
@@ -20,24 +20,34 @@ type (
 		TOKEN     string
 	}
 
+	RedisConfig struct {
+		URL      string `mapstructure:"url"`
+		Port     string `mapstructure:"port"`
+		Password string `mapstructure:"password"`
+		DB       int    `mapstructure:"db"`
+	}
+
 	HerokuConfig struct {
 		URL string `mapstructure:"url"`
 	}
 )
 
 func Init(configPath string) (*Config, error) {
-	if err := parseConfigPath(configPath); err != nil {
+	if err := parseConfigDir(configPath, os.Getenv("APP_ENV")); err != nil {
 		return nil, err
 	}
 
 	var cfg Config
-	if err := viper.UnmarshalKey("admin", &cfg.AdminBot); err != nil {
+	if err := viper.UnmarshalKey("admin-bot", &cfg.AdminBot); err != nil {
 		return nil, err
 	}
 	if err := viper.UnmarshalKey("public-bot", &cfg.PublicBot); err != nil {
 		return nil, err
 	}
 	if err := viper.UnmarshalKey("heroku", &cfg.Heroku); err != nil {
+		return nil, err
+	}
+	if err := viper.UnmarshalKey("redis", &cfg.Redis); err != nil {
 		return nil, err
 	}
 
@@ -48,13 +58,22 @@ func Init(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-func parseConfigPath(filepath string) error {
-	path := strings.Split(filepath, "/")
+func parseConfigDir(dir, env string) error {
+	viper.AddConfigPath(dir)
+	viper.SetConfigName("main")
 
-	viper.AddConfigPath(path[0])
-	viper.SetConfigName(path[1])
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
 
-	return viper.ReadInConfig()
+	// set additional config file based on environment (local / production)
+	if env == "" {
+		viper.SetConfigName("local")
+	} else {
+		viper.SetConfigName(env)
+	}
+
+	return viper.MergeInConfig()
 }
 
 func parseEnv(cfg *Config) error {

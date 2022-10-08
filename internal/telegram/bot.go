@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers"
 )
@@ -10,14 +11,15 @@ import (
 type Bot struct {
 	bot       *tgbotapi.BotAPI
 	handler   handlers.Handler
+	cache     cache.Cache
 	parseMode string
 }
 
-func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler) *Bot {
-	return &Bot{bot: bot, handler: handler}
+func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler, cache cache.Cache) *Bot {
+	return &Bot{bot: bot, handler: handler, cache: cache}
 }
 
-func Init(cfg config.BotConfig, handler handlers.Handler) (*Bot, error) {
+func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache) (*Bot, error) {
 
 	bot, err := tgbotapi.NewBotAPI(cfg.TOKEN)
 	if err != nil {
@@ -26,7 +28,7 @@ func Init(cfg config.BotConfig, handler handlers.Handler) (*Bot, error) {
 
 	bot.Debug = cfg.Debug
 
-	telegramBot := NewBot(bot, handler)
+	telegramBot := NewBot(bot, handler, cache)
 	telegramBot.SetParseMode(cfg.ParseMode)
 
 	return telegramBot, nil
