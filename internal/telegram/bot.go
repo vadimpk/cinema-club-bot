@@ -6,12 +6,14 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers"
+	"log"
 )
 
 type Bot struct {
 	bot       *tgbotapi.BotAPI
 	handler   handlers.Handler
 	cache     cache.Cache
+	updates   tgbotapi.UpdatesChannel
 	parseMode string
 }
 
@@ -38,7 +40,7 @@ func (b *Bot) SetParseMode(parseMode string) {
 	b.parseMode = parseMode
 }
 
-func (b *Bot) initUpdatesChannel(cfg config.BotConfig, herokuConfig config.HerokuConfig) (tgbotapi.UpdatesChannel, error) {
+func (b *Bot) initUpdatesChannel(cfg config.BotConfig, herokuConfig config.HerokuConfig) error {
 	// if debug - polling
 	if cfg.Debug {
 		_, _ = b.bot.SetWebhook(tgbotapi.NewWebhook(""))
@@ -46,14 +48,33 @@ func (b *Bot) initUpdatesChannel(cfg config.BotConfig, herokuConfig config.Herok
 		u := tgbotapi.NewUpdate(0)
 		u.Timeout = cfg.Timeout
 
-		return b.bot.GetUpdatesChan(u)
+		upd, err := b.bot.GetUpdatesChan(u)
+		b.updates = upd
+
+		return err
 	} else {
 		// set heroku webhook
 		_, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(herokuConfig.URL, b.bot.Token)))
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		return b.bot.ListenForWebhook("/" + b.bot.Token), nil
+		b.updates = b.bot.ListenForWebhook("/" + b.bot.Token)
+		return nil
+	}
+}
+
+func (b *Bot) handleUpdates() {
+	for update := range b.updates {
+		if update.Message != nil { // If we got a message
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+
+			msg, err := b.handler.HandleMessage(update.Message)
+			if err != nil {
+				log.Println(err)
+			}
+
+			b.bot.Send(msg)
+		}
 	}
 }

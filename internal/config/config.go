@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/spf13/viper"
 	"os"
+	"time"
 )
 
 type (
@@ -21,10 +22,11 @@ type (
 	}
 
 	RedisConfig struct {
-		URL      string `mapstructure:"url"`
-		Port     string `mapstructure:"port"`
-		Password string `mapstructure:"password"`
-		DB       int    `mapstructure:"db"`
+		URL      string        `mapstructure:"url"`
+		Port     string        `mapstructure:"port"`
+		Password string        `mapstructure:"password"`
+		DB       int           `mapstructure:"db"`
+		TTL      time.Duration `mapstructure:"ttl"`
 	}
 
 	HerokuConfig struct {

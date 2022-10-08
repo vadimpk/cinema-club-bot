@@ -18,8 +18,8 @@ func Run(configDir string) {
 
 	cache := redis2.NewCache(cfg.Redis)
 
-	adminHandler := admin.NewHandler()
-	publicHandler := public.NewHandler()
+	adminHandler := admin.NewHandler(cache)
+	publicHandler := public.NewHandler(cache)
 
 	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler, cache)
 	if err != nil {
