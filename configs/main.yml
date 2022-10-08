@@ -1,3 +1,7 @@
+main:
+  environment: "local"
+  stage: "test"
+  
 admin-bot:
   debug: true
   timeout: 60
@@ -10,6 +14,3 @@ public-bot:
 
 heroku:
   url: "https://mohyla-cinema-club-bot.herokuapp.com/%s"
-
-redis:
-  url: "localhost"

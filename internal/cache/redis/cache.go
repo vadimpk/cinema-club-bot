@@ -3,7 +3,6 @@ package redis
 import (
 	"context"
 	"github.com/go-redis/redis/v9"
-	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"time"
 )
 
@@ -12,15 +11,8 @@ type Cache struct {
 	ttl time.Duration
 }
 
-func NewCache(cfg config.RedisConfig) *Cache {
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.URL + cfg.Port,
-		Password: cfg.Password, // no password set
-		DB:       cfg.DB,       // use default DB
-	})
-
-	return &Cache{db: rdb, ttl: cfg.TTL}
+func NewCache(db *redis.Client, ttl time.Duration) *Cache {
+	return &Cache{db: db, ttl: ttl}
 }
 
 func (c *Cache) SetState(ctx context.Context, chatID string, state string) error {

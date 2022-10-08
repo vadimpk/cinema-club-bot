@@ -8,10 +8,17 @@ import (
 
 type (
 	Config struct {
+		Main      MainConfig
 		AdminBot  BotConfig
 		PublicBot BotConfig
 		Heroku    HerokuConfig
 		Redis     RedisConfig
+		Mongo     MongoConfig
+	}
+
+	MainConfig struct {
+		Environment string
+		Stage       string
 	}
 
 	BotConfig struct {
@@ -29,17 +36,26 @@ type (
 		TTL      time.Duration `mapstructure:"ttl"`
 	}
 
+	MongoConfig struct {
+		URI  string
+		Name string
+	}
+
 	HerokuConfig struct {
 		URL string `mapstructure:"url"`
 	}
 )
 
 func Init(configPath string) (*Config, error) {
+
 	if err := parseConfigDir(configPath, os.Getenv("APP_ENV")); err != nil {
 		return nil, err
 	}
 
 	var cfg Config
+	if err := viper.UnmarshalKey("main", &cfg.Main); err != nil {
+		return nil, err
+	}
 	if err := viper.UnmarshalKey("admin-bot", &cfg.AdminBot); err != nil {
 		return nil, err
 	}
@@ -80,23 +96,19 @@ func parseConfigDir(dir, env string) error {
 
 func parseEnv(cfg *Config) error {
 
-	if cfg.AdminBot.Debug {
-		viper.SetConfigFile(".env")
-		if err := viper.ReadInConfig(); err != nil {
-			return err
-		}
-		cfg.AdminBot.TOKEN = viper.GetString("TEST_ADMIN_BOT_API_TOKEN")
-	} else {
-		cfg.AdminBot.TOKEN = os.Getenv("ADMIN_BOT_API_TOKEN")
+	viper.SetConfigFile(".env")
+	if err := viper.ReadInConfig(); err != nil {
+		return err
 	}
 
-	if cfg.PublicBot.Debug {
-		viper.SetConfigFile(".env")
-		if err := viper.ReadInConfig(); err != nil {
-			return err
-		}
+	cfg.Mongo.URI = viper.GetString("MONGO_URI")
+	cfg.Mongo.Name = viper.GetString("MONGO_DB_NAME")
+
+	if cfg.Main.Stage == "test" {
+		cfg.AdminBot.TOKEN = viper.GetString("TEST_ADMIN_BOT_API_TOKEN")
 		cfg.PublicBot.TOKEN = viper.GetString("TEST_PUBLIC_BOT_API_TOKEN")
 	} else {
+		cfg.AdminBot.TOKEN = os.Getenv("ADMIN_BOT_API_TOKEN")
 		cfg.PublicBot.TOKEN = os.Getenv("PUBLIC_BOT_API_TOKEN")
 	}
 
