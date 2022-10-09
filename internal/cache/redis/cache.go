@@ -22,3 +22,15 @@ func (c *Cache) SetState(ctx context.Context, chatID string, state string) error
 func (c *Cache) GetState(ctx context.Context, chatID string) (string, error) {
 	return c.db.Get(ctx, chatID).Result()
 }
+
+func (c *Cache) SetIdentifier(ctx context.Context, chatID, identifier string) error {
+	return c.db.Set(ctx, chatID+"_identifier", identifier, c.ttl).Err()
+}
+
+func (c *Cache) GetIdentifier(ctx context.Context, chatID string) (string, error) {
+	return c.db.Get(ctx, chatID+"_identifier").Result()
+}
+
+func (c *Cache) RemoveIdentifier(ctx context.Context, chatID string) error {
+	return c.db.Del(ctx, chatID+"_identifier").Err()
+}
