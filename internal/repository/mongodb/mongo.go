@@ -10,7 +10,16 @@ import (
 
 const timeout = 10 * time.Second
 
-type Repository struct {
+type Repositories struct {
+	*AdminRepository
+	*EventsRepository
+}
+
+func NewRepositories(db *mongo.Database) *Repositories {
+	return &Repositories{
+		AdminRepository:  NewAdminRepository(db),
+		EventsRepository: NewEventsRepository(db),
+	}
 }
 
 // NewClient established connection to a mongoDb instance using provided URI and auth credentials.
