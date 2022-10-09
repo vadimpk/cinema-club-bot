@@ -6,22 +6,24 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers"
+	"github.com/vadimpk/cinema-club-bot/internal/repository"
 	"log"
 )
 
 type Bot struct {
-	bot       *tgbotapi.BotAPI
-	handler   handlers.Handler
-	cache     cache.Cache
-	updates   tgbotapi.UpdatesChannel
-	parseMode string
+	bot        *tgbotapi.BotAPI
+	handler    handlers.Handler
+	cache      cache.Cache
+	repository repository.Repositories
+	updates    tgbotapi.UpdatesChannel
+	parseMode  string
 }
 
-func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler, cache cache.Cache) *Bot {
-	return &Bot{bot: bot, handler: handler, cache: cache}
+func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler, cache cache.Cache, repository repository.Repositories) *Bot {
+	return &Bot{bot: bot, handler: handler, cache: cache, repository: repository}
 }
 
-func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache) (*Bot, error) {
+func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache, repository repository.Repositories) (*Bot, error) {
 
 	bot, err := tgbotapi.NewBotAPI(cfg.TOKEN)
 	if err != nil {
@@ -30,7 +32,7 @@ func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache) (*B
 
 	bot.Debug = cfg.Debug
 
-	telegramBot := NewBot(bot, handler, cache)
+	telegramBot := NewBot(bot, handler, cache, repository)
 	telegramBot.SetParseMode(cfg.ParseMode)
 
 	return telegramBot, nil
@@ -67,7 +69,7 @@ func (b *Bot) initUpdatesChannel(cfg config.BotConfig, herokuConfig config.Herok
 func (b *Bot) handleUpdates() {
 	for update := range b.updates {
 		if update.Message != nil { // If we got a message
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			//log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 			msg, err := b.handler.HandleMessage(update.Message)
 			if err != nil {

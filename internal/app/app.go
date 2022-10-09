@@ -37,17 +37,19 @@ func Run(configDir string) {
 		log.Fatal(err)
 	}
 
-	_ = mongoClient.Database(cfg.Mongo.Name)
+	mdb := mongoClient.Database(cfg.Mongo.Name)
 
-	adminHandler := admin.NewHandler(cache)
-	publicHandler := public.NewHandler(cache)
+	repos := mongodb.NewRepositories(mdb)
 
-	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler, cache)
+	adminHandler := admin.NewHandler(cache, repos)
+	publicHandler := public.NewHandler(cache, repos)
+
+	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler, cache, repos)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	publicBot, err := telegram.Init(cfg.PublicBot, publicHandler, cache)
+	publicBot, err := telegram.Init(cfg.PublicBot, publicHandler, cache, repos)
 	if err != nil {
 		log.Fatal(err)
 	}
