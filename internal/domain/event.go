@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -13,4 +14,8 @@ type Event struct {
 	ListID      primitive.ObjectID `bson:"list_id" json:"list_id"`
 	Date        time.Time          `bson:"date" json:"date"`
 	Active      bool               `bson:"active" json:"active"`
+}
+
+func (e Event) Format(list List) string {
+	return fmt.Sprintf("Назва: %s\nДата:%s\nКількість місць:%d\nОпис:%s", e.Name, e.Date.Format(time.RFC850), list.Capacity, e.Description)
 }
