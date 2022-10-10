@@ -23,8 +23,16 @@ func (h *Handler) createNewEvent(ctx context.Context, message *tgbotapi.Message)
 		return tgbotapi.NewMessage(message.Chat.ID, "Подія з таким ідентифікатором вже існує. Введіть новий ідентифікатор:"), nil
 	}
 
+	id, err := h.repos.CreateList(ctx, domain.List{
+		EventIdentifier: identifier,
+	})
+	if err != nil {
+		return h.errorDB("Unexpected error when creating event: ", err, message.Chat.ID)
+	}
+
 	err = h.repos.CreateEvent(ctx, domain.Event{
 		Identifier: identifier,
+		ListID:     id,
 	})
 	if err != nil {
 		return h.errorDB("Unexpected error when creating event: ", err, message.Chat.ID)
@@ -61,6 +69,9 @@ func (h *Handler) updateEvent(ctx context.Context, message *tgbotapi.Message,
 	}
 
 	err = updateFunc(&event, message)
+	if err != nil {
+		return tgbotapi.NewMessage(message.Chat.ID, err.Error()), err
+	}
 
 	// update entry in db
 	err = h.repos.UpdateEvent(ctx, event)

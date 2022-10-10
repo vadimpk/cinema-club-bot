@@ -20,7 +20,7 @@ type Events interface {
 }
 
 type Lists interface {
-	CreateList(ctx context.Context, obj domain.List) error
+	CreateList(ctx context.Context, obj domain.List) (primitive.ObjectID, error)
 	UpdateList(ctx context.Context, obj domain.List) error
 	GetList(ctx context.Context, id primitive.ObjectID) (domain.List, error)
 }

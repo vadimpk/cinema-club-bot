@@ -16,9 +16,12 @@ func NewListsRepository(mdb *mongo.Database) *ListsRepository {
 	return &ListsRepository{db: mdb.Collection(listsCollection)}
 }
 
-func (r *ListsRepository) CreateList(ctx context.Context, obj domain.List) error {
-	_, err := r.db.InsertOne(ctx, obj)
-	return err
+func (r *ListsRepository) CreateList(ctx context.Context, obj domain.List) (primitive.ObjectID, error) {
+	res, err := r.db.InsertOne(ctx, obj)
+	if err != nil {
+		return primitive.ObjectID{}, err
+	}
+	return res.InsertedID.(primitive.ObjectID), err
 }
 
 func (r *ListsRepository) UpdateList(ctx context.Context, obj domain.List) error {

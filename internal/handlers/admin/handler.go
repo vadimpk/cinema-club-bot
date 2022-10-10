@@ -17,12 +17,13 @@ type Handler struct {
 }
 
 const (
-	startState             = "starting state"
-	createState            = "creating new event state"
-	updateNameState        = "updating name of the event"
-	updateDescriptionState = "updating description of the event"
-	updateDateState        = "updating state of the event"
-	updateActiveState      = "updating active status of the event"
+	startState              = "starting state"
+	createState             = "creating new event state"
+	updateNameState         = "updating name of the event"
+	updateDescriptionState  = "updating description of the event"
+	updateListCapacityState = "updating list capacity of the event"
+	updateDateState         = "updating state of the event"
+	updateActiveState       = "updating active status of the event"
 )
 
 func NewHandler(cache cache.Cache, repos repository.Repositories) *Handler {
@@ -60,7 +61,9 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) (tgbotapi.MessageConf
 	case updateNameState:
 		return h.updateEvent(ctx, message, h.updateEventName, updateDescriptionState, "Введіть опис події:")
 	case updateDescriptionState:
-		return h.updateEvent(ctx, message, h.updateEventDescription, updateDateState, "Введіть дату події (2022-02-22T15:30:00): ")
+		return h.updateEvent(ctx, message, h.updateEventDescription, updateListCapacityState, "Введіть кількість вільних місць на подію:")
+	case updateListCapacityState:
+		return h.updateList(ctx, message, h.updateListCapacity, updateDateState, "Введіть дату події (2022-02-22T15:30:00):")
 	case updateDateState:
 		return h.updateEvent(ctx, message, h.updateEventDate, updateActiveState, "Активувати подію одразу (yes):")
 	case updateActiveState:
