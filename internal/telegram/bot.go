@@ -7,7 +7,6 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers"
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
-	"log"
 )
 
 type Bot struct {
@@ -71,11 +70,7 @@ func (b *Bot) handleUpdates() {
 		if update.Message != nil { // If we got a message
 			//log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-			msg, err := b.handler.HandleMessage(update.Message)
-			if err != nil {
-				log.Println(err)
-			}
-
+			msg := b.handler.HandleMessage(update.Message)
 			b.bot.Send(msg)
 		}
 	}

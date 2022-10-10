@@ -17,20 +17,41 @@ type Handler struct {
 }
 
 const (
-	startState              = "starting state"
-	createState             = "creating new event state"
-	updateNameState         = "updating name of the event"
-	updateDescriptionState  = "updating description of the event"
-	updateListCapacityState = "updating list capacity of the event"
-	updateDateState         = "updating state of the event"
-	updateActiveState       = "updating active status of the event"
+	updateEventOption = "Редагувати подію"
+	lookUpListsOption = "Переглянути списки"
+	createEventOption = "Створити подію"
+
+	updateEventNameOption         = "Редагувати назву"
+	updateEventDescriptionOption  = "Редагувати опис"
+	updateEventDateOption         = "Редагувати дату"
+	updateEventListCapacityOption = "Редагувати кількість місць"
+	activateEventOption           = "Активувати подію"
+	deactivateEventOption         = "Деактивувати подію"
+	deleteEventOption             = "Видалити подію"
+
+	toMainMenuOption = "На головну"
+)
+
+const (
+	startState                        = "starting state"
+	createState                       = "creating new event state"
+	updateNameState                   = "updating name of the event"
+	updateDescriptionState            = "updating description of the event"
+	updateListCapacityState           = "updating list capacity of the event"
+	updateDateState                   = "updating state of the event"
+	updateNameStateOnCreation         = "updating name of the event on creation"
+	updateDescriptionStateOnCreation  = "updating description of the event on creation"
+	updateListCapacityStateOnCreation = "updating list capacity of the event on creation"
+	updateDateStateOnCreation         = "updating state of the event on creation"
+	chooseEventState                  = "choosing event"
+	chooseEventUpdateOptionsState     = "choosing event update options"
 )
 
 func NewHandler(cache cache.Cache, repos repository.Repositories) *Handler {
 	return &Handler{cache: cache, repos: repos}
 }
 
-func (h *Handler) HandleMessage(message *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
+func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfig {
 	var ctx = context.Background()
 	chatID := convertChatIDToString(message.Chat.ID)
 
@@ -41,7 +62,7 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) (tgbotapi.MessageConf
 			err := h.initAdmin(ctx, chatID)
 			// if unable to init admin, return message saying forbidden
 			if err != nil {
-				return tgbotapi.NewMessage(message.Chat.ID, err.Error()), err
+				return tgbotapi.NewMessage(message.Chat.ID, err.Error())
 			}
 			state = startState
 		} else {
@@ -49,28 +70,72 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) (tgbotapi.MessageConf
 		}
 	}
 
-	if message.IsCommand() {
-		return h.handleCommands(ctx, message)
+	if message.IsCommand() && message.Command() == "start" {
+		return h.handleStart(ctx, message, "Виберіть дію:")
+	}
+
+	if state == startState || state == chooseEventUpdateOptionsState {
+		switch message.Text {
+		case toMainMenuOption:
+			return h.goToMainMenu(ctx, message, "Виберіть дію:")
+		case createEventOption:
+			return h.handleCreationStartProcess(ctx, message)
+		case updateEventOption:
+			return h.chooseEvent(ctx, message)
+		case updateEventNameOption:
+			return h.askToEnterData(ctx, message, updateNameState, "Введіть назву події:")
+		case updateEventDescriptionOption:
+			return h.askToEnterData(ctx, message, updateDescriptionState, "Введіть опис події:")
+		case updateEventDateOption:
+			return h.askToEnterData(ctx, message, updateDateState, "Введіть дату події (2022-02-22T15:30:00):")
+		case updateEventListCapacityOption:
+			return h.askToEnterData(ctx, message, updateListCapacityState, "Введіть кількість вільних місць на подію:")
+		case activateEventOption:
+			return h.updateEvent(ctx, message, h.updateEventActiveStatus, "Подію успішно активовано")
+		case deactivateEventOption:
+			return h.updateEvent(ctx, message, h.updateEventActiveStatus, "Подію успішно деактивовано")
+		case deleteEventOption:
+			return h.deleteEvent(ctx, message)
+		}
 	}
 
 	switch state {
 	case startState:
-		return tgbotapi.NewMessage(message.Chat.ID, "Привіт."), nil
+		return h.handleStart(ctx, message, "Виберіть дію:")
+	case chooseEventState:
+		return h.chooseUpdateOptions(ctx, message)
 	case createState:
 		return h.createNewEvent(ctx, message)
 	case updateNameState:
-		return h.updateEvent(ctx, message, h.updateEventName, updateDescriptionState, "Введіть опис події:")
+		return h.updateEvent(ctx, message, h.updateEventName, "Назву успішно змінено")
 	case updateDescriptionState:
-		return h.updateEvent(ctx, message, h.updateEventDescription, updateListCapacityState, "Введіть кількість вільних місць на подію:")
+		return h.updateEvent(ctx, message, h.updateEventDescription, "Опис успішно змінено")
 	case updateListCapacityState:
-		return h.updateList(ctx, message, h.updateListCapacity, updateDateState, "Введіть дату події (2022-02-22T15:30:00):")
+		return h.updateList(ctx, message, h.updateListCapacity, "Кількість місць успішно змінено")
 	case updateDateState:
-		return h.updateEvent(ctx, message, h.updateEventDate, updateActiveState, "Активувати подію одразу (yes):")
-	case updateActiveState:
-		return h.updateEvent(ctx, message, h.updateEventActiveStatus, startState, "Подію успішно створено.")
+		return h.updateEvent(ctx, message, h.updateEventDate, "Дату успішно змінено")
+	case updateNameStateOnCreation:
+		return h.updateEventOnCreation(ctx, message, h.updateEventName, updateDescriptionStateOnCreation, "Введіть опис події:", false)
+	case updateDescriptionStateOnCreation:
+		return h.updateEventOnCreation(ctx, message, h.updateEventDescription, updateListCapacityStateOnCreation, "Введіть кількість місць на подію:", false)
+	case updateListCapacityStateOnCreation:
+		return h.updateListOnCreation(ctx, message, h.updateListCapacity, updateDateStateOnCreation, "Введіть дату події (2022-02-22T15:30:00):", false)
+	case updateDateStateOnCreation:
+		return h.updateEventOnCreation(ctx, message, h.updateEventDate, updateDateStateOnCreation, "Подію успішно створено", true)
 	}
 
-	return tgbotapi.MessageConfig{}, err
+	return tgbotapi.MessageConfig{}
+}
+
+func (h *Handler) handleStart(ctx context.Context, message *tgbotapi.Message, msgText string) tgbotapi.MessageConfig {
+	// set state to cache
+	err := h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), startState)
+	if err != nil {
+		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
+	}
+	msg := tgbotapi.NewMessage(message.Chat.ID, msgText)
+	msg.ReplyMarkup = h.getOptionsKeyboard(false)
+	return msg
 }
 
 func (h *Handler) initAdmin(ctx context.Context, chatID string) error {
