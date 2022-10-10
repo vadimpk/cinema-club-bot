@@ -13,12 +13,14 @@ const timeout = 10 * time.Second
 type Repositories struct {
 	*AdminRepository
 	*EventsRepository
+	*ListsRepository
 }
 
 func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
 		AdminRepository:  NewAdminRepository(db),
 		EventsRepository: NewEventsRepository(db),
+		ListsRepository:  NewListsRepository(db),
 	}
 }
 

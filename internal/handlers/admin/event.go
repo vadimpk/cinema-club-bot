@@ -14,7 +14,7 @@ func (h *Handler) createNewEvent(ctx context.Context, message *tgbotapi.Message)
 
 	// check if identifier is unique
 	identifier := message.Text
-	_, err := h.repos.Get(ctx, identifier)
+	_, err := h.repos.GetEvent(ctx, identifier)
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
 			return h.errorDB("Unexpected error when getting event: ", err, message.Chat.ID)
@@ -23,7 +23,7 @@ func (h *Handler) createNewEvent(ctx context.Context, message *tgbotapi.Message)
 		return tgbotapi.NewMessage(message.Chat.ID, "Подія з таким ідентифікатором вже існує. Введіть новий ідентифікатор:"), nil
 	}
 
-	err = h.repos.Create(ctx, domain.Event{
+	err = h.repos.CreateEvent(ctx, domain.Event{
 		Identifier: identifier,
 	})
 	if err != nil {
@@ -55,7 +55,7 @@ func (h *Handler) updateEvent(ctx context.Context, message *tgbotapi.Message,
 		return h.errorDB("Unexpected error when reading cache:", err, message.Chat.ID)
 	}
 	// get event from db
-	event, err := h.repos.Get(ctx, identifier)
+	event, err := h.repos.GetEvent(ctx, identifier)
 	if err != nil {
 		return h.errorDB("Unexpected error when reading event:", err, message.Chat.ID)
 	}
@@ -63,7 +63,7 @@ func (h *Handler) updateEvent(ctx context.Context, message *tgbotapi.Message,
 	err = updateFunc(&event, message)
 
 	// update entry in db
-	err = h.repos.Update(ctx, event)
+	err = h.repos.UpdateEvent(ctx, event)
 	if err != nil {
 		return h.errorDB("Unexpected error when updating event:", err, message.Chat.ID)
 	}

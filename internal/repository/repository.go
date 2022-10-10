@@ -11,24 +11,22 @@ type Admins interface {
 }
 
 type Events interface {
-	Create(ctx context.Context, obj domain.Event) error
-	Update(ctx context.Context, obj domain.Event) error
-	Get(ctx context.Context, identifier string) (domain.Event, error)
+	CreateEvent(ctx context.Context, obj domain.Event) error
+	UpdateEvent(ctx context.Context, obj domain.Event) error
+	GetEvent(ctx context.Context, identifier string) (domain.Event, error)
 	GetAll(ctx context.Context) ([]domain.Event, error)
 	GetActive(ctx context.Context) ([]domain.Event, error)
-	Delete(ctx context.Context, identifier string) error
+	DeleteEvent(ctx context.Context, identifier string) error
 }
 
 type Lists interface {
-	Create(ctx context.Context, obj domain.List) error
-	InsertUser(ctx context.Context, user domain.User) error
-	DeleteUser(ctx context.Context, userPhone string) error
-	Get(ctx context.Context, id primitive.ObjectID) ([]domain.List, error)
-	GetActive(ctx context.Context) ([]domain.Event, error)
-	Delete(ctx context.Context, identifier string) error
+	CreateList(ctx context.Context, obj domain.List) error
+	UpdateList(ctx context.Context, obj domain.List) error
+	GetList(ctx context.Context, id primitive.ObjectID) (domain.List, error)
 }
 
 type Repositories interface {
 	Admins
 	Events
+	Lists
 }

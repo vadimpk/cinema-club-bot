@@ -15,17 +15,17 @@ func NewEventsRepository(mdb *mongo.Database) *EventsRepository {
 	return &EventsRepository{db: mdb.Collection(eventsCollection)}
 }
 
-func (r *EventsRepository) Create(ctx context.Context, obj domain.Event) error {
+func (r *EventsRepository) CreateEvent(ctx context.Context, obj domain.Event) error {
 	_, err := r.db.InsertOne(ctx, obj)
 	return err
 }
 
-func (r *EventsRepository) Update(ctx context.Context, obj domain.Event) error {
+func (r *EventsRepository) UpdateEvent(ctx context.Context, obj domain.Event) error {
 	_, err := r.db.UpdateOne(ctx, bson.M{"_id": obj.ID}, bson.M{"$set": obj})
 	return err
 }
 
-func (r *EventsRepository) Get(ctx context.Context, identifier string) (domain.Event, error) {
+func (r *EventsRepository) GetEvent(ctx context.Context, identifier string) (domain.Event, error) {
 	var event domain.Event
 	err := r.db.FindOne(ctx, bson.M{"identifier": identifier}).Decode(&event)
 	return event, err
@@ -55,7 +55,7 @@ func (r *EventsRepository) GetActive(ctx context.Context) ([]domain.Event, error
 	return events, err
 }
 
-func (r *EventsRepository) Delete(ctx context.Context, identifier string) error {
+func (r *EventsRepository) DeleteEvent(ctx context.Context, identifier string) error {
 	_, err := r.db.DeleteOne(ctx, bson.M{"identifier": identifier})
 	return err
 }
