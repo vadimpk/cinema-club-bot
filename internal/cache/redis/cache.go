@@ -34,3 +34,11 @@ func (c *Cache) GetIdentifier(ctx context.Context, chatID string) (string, error
 func (c *Cache) RemoveIdentifier(ctx context.Context, chatID string) error {
 	return c.db.Del(ctx, chatID+"_identifier").Err()
 }
+
+func (c *Cache) SetName(ctx context.Context, chatID string, name string) error {
+	return c.db.Set(ctx, chatID+"_name", name, c.ttl).Err()
+}
+
+func (c *Cache) GetName(ctx context.Context, chatID string) (string, error) {
+	return c.db.Get(ctx, chatID+"_name").Result()
+}
