@@ -7,7 +7,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
-	"log"
 	"strconv"
 )
 
@@ -66,7 +65,7 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 			}
 			state = startState
 		} else {
-			log.Println("Unexpected error when reading cache: ", err)
+			return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 		}
 	}
 
