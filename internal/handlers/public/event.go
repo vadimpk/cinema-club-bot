@@ -15,7 +15,24 @@ func (h *Handler) seeProgram(ctx context.Context, message *tgbotapi.Message) tgb
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}
 
-	msg := tgbotapi.NewMessage(message.Chat.ID, "Афіша")
+	// get events
+	events, err := h.repos.GetActive(ctx)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return tgbotapi.NewMessage(message.Chat.ID, "На даний час активних подій немає")
+		}
+		return h.errorDB("Unexpected error when reading active events:", err, message.Chat.ID)
+	}
+	text := "Найближчі події Кіноклубу:\n\n"
+	for _, event := range events {
+		list, err := h.repos.GetList(ctx, event.ListID)
+		if err != nil {
+			return h.errorDB("Unexpected error when reading active events:", err, message.Chat.ID)
+		}
+		text += event.Preview(list)
+	}
+
+	msg := tgbotapi.NewMessage(message.Chat.ID, text)
 	msg.ReplyMarkup = h.getToMainMenuKeyboard(false)
 	return msg
 }

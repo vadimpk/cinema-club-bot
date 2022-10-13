@@ -22,7 +22,7 @@ func (h *Handler) getToMainMenuKeyboard(oneTime bool) tgbotapi.ReplyKeyboardMark
 }
 
 func (h *Handler) getEventsKeyboard(ctx context.Context, oneTime bool) (tgbotapi.ReplyKeyboardMarkup, error) {
-	events, err := h.repos.GetAll(ctx)
+	events, err := h.repos.GetActive(ctx)
 	if err != nil {
 		return tgbotapi.ReplyKeyboardMarkup{}, err
 	}

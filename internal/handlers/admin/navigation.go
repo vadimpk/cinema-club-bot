@@ -50,7 +50,7 @@ func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Mes
 /*
 chooseEvent - returns message with keyboard of events' identifiers to choose from
 */
-func (h *Handler) chooseEvent(ctx context.Context, message *tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) chooseEvent(ctx context.Context, message *tgbotapi.Message, nextState string) tgbotapi.MessageConfig {
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Оберіть подію: ")
 	keyboard, err := h.getEventsKeyboard(ctx, true)
 	if err != nil {
@@ -59,7 +59,7 @@ func (h *Handler) chooseEvent(ctx context.Context, message *tgbotapi.Message) tg
 	msg.ReplyMarkup = keyboard
 
 	// set state to cache
-	err = h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), chooseEventState)
+	err = h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), nextState)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}

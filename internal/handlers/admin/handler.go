@@ -16,34 +16,25 @@ type Handler struct {
 }
 
 const (
-	updateEventOption = "Редагувати подію"
-	lookUpListsOption = "Переглянути списки"
-	createEventOption = "Створити подію"
+	startState  = "starting state"
+	createState = "creating new event state"
 
-	updateEventNameOption         = "Редагувати назву"
-	updateEventDescriptionOption  = "Редагувати опис"
-	updateEventDateOption         = "Редагувати дату"
-	updateEventListCapacityOption = "Редагувати кількість місць"
-	activateEventOption           = "Активувати подію"
-	deactivateEventOption         = "Деактивувати подію"
-	deleteEventOption             = "Видалити подію"
+	updateNameState         = "updating name of the event"
+	updateDescriptionState  = "updating description of the event"
+	updateListCapacityState = "updating list capacity of the event"
+	updateDateState         = "updating state of the event"
 
-	toMainMenuOption = "На головну"
-)
-
-const (
-	startState                        = "starting state"
-	createState                       = "creating new event state"
-	updateNameState                   = "updating name of the event"
-	updateDescriptionState            = "updating description of the event"
-	updateListCapacityState           = "updating list capacity of the event"
-	updateDateState                   = "updating state of the event"
 	updateNameStateOnCreation         = "updating name of the event on creation"
 	updateDescriptionStateOnCreation  = "updating description of the event on creation"
 	updateListCapacityStateOnCreation = "updating list capacity of the event on creation"
 	updateDateStateOnCreation         = "updating state of the event on creation"
-	chooseEventState                  = "choosing event"
-	chooseEventUpdateOptionsState     = "choosing event update options"
+
+	chooseEventToUpdateState      = "choosing event to then update"
+	chooseEventForListsState      = "choosing event to see lists"
+	chooseEventUpdateOptionsState = "choosing event update options"
+
+	lookingAtListState     = "looking at list"
+	deleteReservationState = "deleting reservation"
 )
 
 func NewHandler(cache cache.Cache, repos repository.Repositories) *Handler {
@@ -73,14 +64,16 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 		return h.handleStart(ctx, message, "Виберіть дію:")
 	}
 
-	if state == startState || state == chooseEventUpdateOptionsState {
+	if state == startState || state == chooseEventUpdateOptionsState || state == lookingAtListState {
 		switch message.Text {
 		case toMainMenuOption:
 			return h.goToMainMenu(ctx, message, "Виберіть дію:")
 		case createEventOption:
 			return h.handleCreationStartProcess(ctx, message)
+		case lookUpListsOption:
+			return h.chooseEvent(ctx, message, chooseEventForListsState)
 		case updateEventOption:
-			return h.chooseEvent(ctx, message)
+			return h.chooseEvent(ctx, message, chooseEventToUpdateState)
 		case updateEventNameOption:
 			return h.askToEnterData(ctx, message, updateNameState, "Введіть назву події:")
 		case updateEventDescriptionOption:
@@ -95,14 +88,18 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 			return h.updateEvent(ctx, message, h.updateEventActiveStatus, "Подію успішно деактивовано")
 		case deleteEventOption:
 			return h.deleteEvent(ctx, message)
+		case deleteReservationOption:
+			return h.askToEnterData(ctx, message, deleteReservationState, "Введіть номер телефону учасника, якого видалити:")
 		}
 	}
 
 	switch state {
 	case startState:
 		return h.handleStart(ctx, message, "Виберіть дію:")
-	case chooseEventState:
+	case chooseEventToUpdateState:
 		return h.chooseUpdateOptions(ctx, message)
+	case chooseEventForListsState:
+		return h.retrieveList(ctx, message)
 	case createState:
 		return h.createNewEvent(ctx, message)
 	case updateNameState:
@@ -121,6 +118,8 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 		return h.updateListOnCreation(ctx, message, h.updateListCapacity, updateDateStateOnCreation, "Введіть дату події (2022-02-22T15:30:00):", false)
 	case updateDateStateOnCreation:
 		return h.updateEventOnCreation(ctx, message, h.updateEventDate, updateDateStateOnCreation, "Подію успішно створено", true)
+	case deleteReservationState:
+		return h.deleteReservation(ctx, message)
 	}
 
 	return tgbotapi.MessageConfig{}

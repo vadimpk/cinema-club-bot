@@ -6,6 +6,24 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/domain"
 )
 
+const (
+	updateEventOption = "Редагувати подію"
+	lookUpListsOption = "Переглянути списки"
+	createEventOption = "Створити подію"
+
+	updateEventNameOption         = "Редагувати назву"
+	updateEventDescriptionOption  = "Редагувати опис"
+	updateEventDateOption         = "Редагувати дату"
+	updateEventListCapacityOption = "Редагувати кількість місць"
+	activateEventOption           = "Активувати подію"
+	deactivateEventOption         = "Деактивувати подію"
+	deleteEventOption             = "Видалити подію"
+
+	deleteReservationOption = "Видалити учасника"
+
+	toMainMenuOption = "На головну"
+)
+
 func (h *Handler) getOptionsKeyboard(oneTime bool) tgbotapi.ReplyKeyboardMarkup {
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventOption)),
@@ -49,4 +67,21 @@ func (h *Handler) getEventsKeyboard(ctx context.Context, oneTime bool) (tgbotapi
 	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
 	keyboard.OneTimeKeyboard = oneTime
 	return keyboard, nil
+}
+
+func (h *Handler) getListOptions(oneTime bool) tgbotapi.ReplyKeyboardMarkup {
+	keyboard := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(deleteReservationOption)),
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(toMainMenuOption)))
+
+	keyboard.OneTimeKeyboard = oneTime
+	return keyboard
+}
+
+func (h *Handler) getToMainMenuOption(oneTime bool) tgbotapi.ReplyKeyboardMarkup {
+	keyboard := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(toMainMenuOption)))
+
+	keyboard.OneTimeKeyboard = oneTime
+	return keyboard
 }

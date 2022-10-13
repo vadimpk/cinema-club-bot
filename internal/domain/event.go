@@ -19,3 +19,7 @@ type Event struct {
 func (e Event) Format(list List) string {
 	return fmt.Sprintf("Назва: %s\nДата:%s\nКількість місць:%d\nОпис:%s", e.Name, e.Date.Format(time.RFC850), list.Capacity, e.Description)
 }
+
+func (e Event) Preview(list List) string {
+	return fmt.Sprintf("Назва: %s\nДата:%s\nКількість місць:%d\nОпис:%s", e.Name, e.Date.Format(time.RFC850), list.Capacity, e.Description)
+}
