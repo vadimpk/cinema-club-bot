@@ -70,8 +70,10 @@ func (b *Bot) handleUpdates() {
 		if update.Message != nil { // If we got a message
 			//log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-			msg := b.handler.HandleMessage(update.Message)
-			b.bot.Send(msg)
+			messages := b.handler.HandleMessage(update.Message)
+			for _, msg := range messages {
+				b.sendMessage(msg)
+			}
 		}
 	}
 }

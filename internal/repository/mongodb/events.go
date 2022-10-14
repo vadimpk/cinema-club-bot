@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/vadimpk/cinema-club-bot/internal/domain"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 type EventsRepository struct {
@@ -17,6 +19,20 @@ func NewEventsRepository(mdb *mongo.Database) *EventsRepository {
 
 func (r *EventsRepository) CreateEvent(ctx context.Context, obj domain.Event) error {
 	_, err := r.db.InsertOne(ctx, obj)
+	return err
+}
+
+func (r *EventsRepository) CreateTestEvent(ctx context.Context, identifier string, listID primitive.ObjectID) error {
+	event := domain.Event{
+		ID:          primitive.ObjectID{},
+		Identifier:  identifier,
+		Name:        "Test event",
+		Description: "Testing event",
+		ListID:      listID,
+		Date:        time.Now(),
+		Active:      false,
+	}
+	_, err := r.db.InsertOne(ctx, event)
 	return err
 }
 

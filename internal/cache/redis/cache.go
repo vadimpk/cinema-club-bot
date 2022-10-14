@@ -23,6 +23,14 @@ func (c *Cache) GetState(ctx context.Context, chatID string) (string, error) {
 	return c.db.Get(ctx, chatID).Result()
 }
 
+func (c *Cache) SetAdminState(ctx context.Context, chatID string, state string) error {
+	return c.db.Set(ctx, chatID+"_admin", state, c.ttl).Err()
+}
+
+func (c *Cache) GetAdminState(ctx context.Context, chatID string) (string, error) {
+	return c.db.Get(ctx, chatID+"_admin").Result()
+}
+
 func (c *Cache) SetIdentifier(ctx context.Context, chatID, identifier string) error {
 	return c.db.Set(ctx, chatID+"_identifier", identifier, c.ttl).Err()
 }

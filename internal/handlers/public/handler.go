@@ -37,7 +37,7 @@ const (
 	noSeatsOption    = "Місць не залишилося"
 )
 
-func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageConfig {
 	var ctx = context.Background()
 	chatID := convertChatIDToString(message.Chat.ID)
 
@@ -51,8 +51,13 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 		}
 	}
 
-	if message.IsCommand() && message.Command() == "start" {
-		return h.handleStart(ctx, message, "Виберіть дію:")
+	if message.IsCommand() {
+		switch message.Command() {
+		case "start":
+			return h.handleStart(ctx, message, "Виберіть дію:")
+		case "send":
+			return h.sendMessagesFromAdmin(ctx, message)
+		}
 	}
 
 	if state == startState {
@@ -75,7 +80,7 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 		case unregisterOption:
 			return h.unregisterAtEvent(ctx, message)
 		case noSeatsOption:
-			return tgbotapi.NewMessage(message.Chat.ID, "Місць на подію вже немає. Перегляньте інші події в афіші")
+			return []tgbotapi.MessageConfig{tgbotapi.NewMessage(message.Chat.ID, "Місць на подію вже немає. Перегляньте інші події в афіші")}
 		case toMainMenuOption:
 			return h.goToMainMenu(ctx, message, "Оберіть дію:")
 		}
@@ -92,10 +97,10 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) tgbotapi.MessageConfi
 		return h.getPhoneNumber(ctx, message)
 	}
 
-	return tgbotapi.MessageConfig{}
+	return []tgbotapi.MessageConfig{}
 }
 
-func (h *Handler) handleStart(ctx context.Context, message *tgbotapi.Message, msgText string) tgbotapi.MessageConfig {
+func (h *Handler) handleStart(ctx context.Context, message *tgbotapi.Message, msgText string) []tgbotapi.MessageConfig {
 	// set state to cache
 	err := h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), startState)
 	if err != nil {
@@ -103,7 +108,7 @@ func (h *Handler) handleStart(ctx context.Context, message *tgbotapi.Message, ms
 	}
 	msg := tgbotapi.NewMessage(message.Chat.ID, msgText)
 	msg.ReplyMarkup = h.getOptionsKeyboard(false)
-	return msg
+	return []tgbotapi.MessageConfig{msg}
 }
 
 func convertChatIDToString(chatID int64) string {

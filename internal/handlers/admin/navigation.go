@@ -2,7 +2,6 @@ package admin
 
 import (
 	"context"
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -11,7 +10,7 @@ import (
 chooseUpdateOptions - validates given message from previous step and if valid sets it to cache.
 Returns message with keyboard to choose updating options from
 */
-func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Message) []tgbotapi.MessageConfig {
 	// check if identifier is valid
 	identifier := message.Text
 	if identifier == toMainMenuOption {
@@ -22,7 +21,7 @@ func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Mes
 		if err != mongo.ErrNoDocuments {
 			return h.errorDB("Unexpected error when getting event: ", err, message.Chat.ID)
 		}
-		return tgbotapi.NewMessage(message.Chat.ID, "Події з таким ідентифікатором не існує. Виберіть ідентифікатор ще раз:")
+		return []tgbotapi.MessageConfig{tgbotapi.NewMessage(message.Chat.ID, "Події з таким ідентифікатором не існує. Виберіть ідентифікатор ще раз:")}
 	}
 
 	list, err := h.repos.GetList(ctx, event.ListID)
@@ -31,7 +30,7 @@ func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Mes
 	}
 
 	// set state to cache
-	err = h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), chooseEventUpdateOptionsState)
+	err = h.cache.SetAdminState(ctx, convertChatIDToString(message.Chat.ID), chooseEventUpdateOptionsState)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}
@@ -42,15 +41,15 @@ func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Mes
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}
 
-	msg := tgbotapi.NewMessage(message.Chat.ID, fmt.Sprintf("%s\n\n%s", event.Format(list), "Виберіть дію:"))
+	msg := tgbotapi.NewMessage(message.Chat.ID, event.Format(list))
 	msg.ReplyMarkup = h.getUpdateEventOptionsKeyboard(event, true)
-	return msg
+	return []tgbotapi.MessageConfig{msg}
 }
 
 /*
 chooseEvent - returns message with keyboard of events' identifiers to choose from
 */
-func (h *Handler) chooseEvent(ctx context.Context, message *tgbotapi.Message, nextState string) tgbotapi.MessageConfig {
+func (h *Handler) chooseEvent(ctx context.Context, message *tgbotapi.Message, nextState string) []tgbotapi.MessageConfig {
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Оберіть подію: ")
 	keyboard, err := h.getEventsKeyboard(ctx, true)
 	if err != nil {
@@ -59,32 +58,34 @@ func (h *Handler) chooseEvent(ctx context.Context, message *tgbotapi.Message, ne
 	msg.ReplyMarkup = keyboard
 
 	// set state to cache
-	err = h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), nextState)
+	err = h.cache.SetAdminState(ctx, convertChatIDToString(message.Chat.ID), nextState)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}
 
-	return msg
+	return []tgbotapi.MessageConfig{msg}
 }
 
 /*
 askToEnterData - gets called when change of some data is requested (either on creation or via buttons)
 Changes state and returns message
 */
-func (h *Handler) askToEnterData(ctx context.Context, message *tgbotapi.Message, state, replyText string) tgbotapi.MessageConfig {
-	err := h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), state)
+func (h *Handler) askToEnterData(ctx context.Context, message *tgbotapi.Message, state, replyText string) []tgbotapi.MessageConfig {
+	err := h.cache.SetAdminState(ctx, convertChatIDToString(message.Chat.ID), state)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}
-	return tgbotapi.NewMessage(message.Chat.ID, replyText)
+	msg := tgbotapi.NewMessage(message.Chat.ID, replyText)
+	msg.ReplyMarkup = h.getCancelUpdateKeyboard(true)
+	return []tgbotapi.MessageConfig{msg}
 }
 
 /*
 goBackToUpdateOptions - gets called after successful updating of data
 to get back to the keyboard with updating options
 */
-func (h *Handler) goBackToUpdateOptions(ctx context.Context, message *tgbotapi.Message, replyText string) tgbotapi.MessageConfig {
-	err := h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), chooseEventUpdateOptionsState)
+func (h *Handler) goBackToUpdateOptions(ctx context.Context, message *tgbotapi.Message, replyText string) []tgbotapi.MessageConfig {
+	err := h.cache.SetAdminState(ctx, convertChatIDToString(message.Chat.ID), chooseEventUpdateOptionsState)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}
@@ -101,15 +102,15 @@ func (h *Handler) goBackToUpdateOptions(ctx context.Context, message *tgbotapi.M
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, replyText)
 	msg.ReplyMarkup = h.getUpdateEventOptionsKeyboard(event, true)
-	return msg
+	return []tgbotapi.MessageConfig{msg}
 }
 
 /*
 goToMainMenu - gets called when user hits toMainMenuButton
 */
-func (h *Handler) goToMainMenu(ctx context.Context, message *tgbotapi.Message, msgText string) tgbotapi.MessageConfig {
+func (h *Handler) goToMainMenu(ctx context.Context, message *tgbotapi.Message, msgText string) []tgbotapi.MessageConfig {
 	// set state to cache
-	err := h.cache.SetState(ctx, convertChatIDToString(message.Chat.ID), startState)
+	err := h.cache.SetAdminState(ctx, convertChatIDToString(message.Chat.ID), startState)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}

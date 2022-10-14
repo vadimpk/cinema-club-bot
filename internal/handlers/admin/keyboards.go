@@ -19,7 +19,10 @@ const (
 	deactivateEventOption         = "Деактивувати подію"
 	deleteEventOption             = "Видалити подію"
 
+	cancelUpdateOption = "Скасувати"
+
 	deleteReservationOption = "Видалити учасника"
+	sendMessageToAllOption  = "Написати всім"
 
 	toMainMenuOption = "На головну"
 )
@@ -69,9 +72,16 @@ func (h *Handler) getEventsKeyboard(ctx context.Context, oneTime bool) (tgbotapi
 	return keyboard, nil
 }
 
+func (h *Handler) getCancelUpdateKeyboard(oneTime bool) tgbotapi.ReplyKeyboardMarkup {
+	keyboard := tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(cancelUpdateOption)))
+	keyboard.OneTimeKeyboard = oneTime
+	return keyboard
+}
+
 func (h *Handler) getListOptions(oneTime bool) tgbotapi.ReplyKeyboardMarkup {
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(deleteReservationOption)),
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(sendMessageToAllOption)),
 		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(toMainMenuOption)))
 
 	keyboard.OneTimeKeyboard = oneTime

@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func (h *Handler) errorDB(msg string, err error, chatID int64) tgbotapi.MessageConfig {
+func (h *Handler) errorDB(msg string, err error, chatID int64) []tgbotapi.MessageConfig {
 	log.Println(msg, err)
-	return tgbotapi.NewMessage(chatID, "Сталася помилка. Натисніть команду /start")
+	return []tgbotapi.MessageConfig{tgbotapi.NewMessage(chatID, "Сталася помилка. Натисніть команду /start")}
 }

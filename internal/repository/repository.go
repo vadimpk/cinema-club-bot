@@ -8,6 +8,9 @@ import (
 
 type Admins interface {
 	IsAdmin(ctx context.Context, chatID string) bool
+	GetAdmin(ctx context.Context, chatID string) (domain.Admin, error)
+	AddMessagesToAdmin(ctx context.Context, chatID string, messages []domain.Message) error
+	ClearAdminMessages(ctx context.Context, chatID string) error
 }
 
 type Events interface {
@@ -17,12 +20,14 @@ type Events interface {
 	GetAll(ctx context.Context) ([]domain.Event, error)
 	GetActive(ctx context.Context) ([]domain.Event, error)
 	DeleteEvent(ctx context.Context, identifier string) error
+	CreateTestEvent(ctx context.Context, identifier string, listID primitive.ObjectID) error
 }
 
 type Lists interface {
 	CreateList(ctx context.Context, obj domain.List) (primitive.ObjectID, error)
 	UpdateList(ctx context.Context, obj domain.List) error
 	GetList(ctx context.Context, id primitive.ObjectID) (domain.List, error)
+	CreateTestList(ctx context.Context, identifier string, chatID string) (primitive.ObjectID, error)
 }
 
 type Repositories interface {
