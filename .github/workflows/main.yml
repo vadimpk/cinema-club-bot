@@ -9,7 +9,6 @@ env:
   REGISTRY: "registry.digitalocean.com/cinema-club-registry"
   IMAGE_NAME: "cinema-club-bot"
   CONTAINER_NAME: "cinema-club"
-  DIGITALOCEAN_ACCESS_TOKEN: "asdadasdada"
 
 jobs:
   build_and_push:
@@ -18,14 +17,14 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@v2
+
+      - name: Build container image
+        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
         
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
-          token: ${{ secrets.SSHKEY }}
-
-      - name: Build container image
-        run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 600
