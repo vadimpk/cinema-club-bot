@@ -13,7 +13,7 @@ public-bot:
   parse_mode: markdown
   
 redis:
-  url: "167.71.69.27"
+  url: "redis-test"
   port: ":6379"
   password: "redis-test"
   db: 0
