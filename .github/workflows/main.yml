@@ -38,13 +38,13 @@ jobs:
 
     steps:
       - name: Deploy to Digital Ocean droplet via SSH action
-        uses: fifsky/ssh-action@master
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          user: ${{ secrets.USERNAME }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
           envs: IMAGE_NAME,REGISTRY,GITHUB_SHA,,CONTAINER_NAME
-          command: |
+          script: |
             # Login into Digital Ocean Registry
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} $(echo $REGISTRY)
             # Stop running container
