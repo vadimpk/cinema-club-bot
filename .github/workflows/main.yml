@@ -22,7 +22,7 @@ jobs:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
-          token: ${ secrets.DIGITALOCEAN_ACCESS_TOKEN }
+          token: dop_v1_fc025eaca202cde0224d783ad3cfd8c734f9b3a414af5df47d5eb3c32e543a54
 
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
