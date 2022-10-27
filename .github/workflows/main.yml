@@ -9,6 +9,7 @@ env:
   REGISTRY: "registry.digitalocean.com/cinema-club-registry"
   IMAGE_NAME: "cinema-club-bot"
   CONTAINER_NAME: "cinema-club"
+  DIGITALOCEAN_ACCESS_TOKEN: "asdadasdada"
 
 jobs:
   build_and_push:
@@ -21,7 +22,7 @@ jobs:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
-          token: ${{ "fdfsdfsadas" }}
+          token: $DIGITALOCEAN_ACCESS_TOKEN
 
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
