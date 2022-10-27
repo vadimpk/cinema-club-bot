@@ -60,7 +60,6 @@ jobs:
             # Run a new container from a new image
             docker run -e ADMIN_BOT_API_TOKEN -e PUBLIC_BOT_API_TOKEN -e MONGO_URI -e MONGO_DB_NAME -e AUTH_SERVER_URL -d \
             -ti \
-            --restart always \
             --publish 80:80 \
             --net redisnet \
             --name $(echo $CONTAINER_NAME) \
