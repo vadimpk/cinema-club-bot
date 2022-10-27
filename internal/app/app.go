@@ -19,6 +19,8 @@ type PromoCode struct {
 
 func Run(configDir, configsFile string) {
 
+	log.Println("started application")
+
 	cfg, err := config.Init(configDir, configsFile)
 	if err != nil {
 		log.Fatal(err)
