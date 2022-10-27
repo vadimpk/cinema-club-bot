@@ -58,9 +58,4 @@ jobs:
             export MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}
             export AUTH_SERVER_URL=${{ secrets.AUTH_SERVER_URL }}
             # Run a new container from a new image
-            docker run -e ADMIN_BOT_API_TOKEN -e PUBLIC_BOT_API_TOKEN -e MONGO_URI -e MONGO_DB_NAME -e AUTH_SERVER_URL -d \
-            -ti \
-            --publish 80:80 \
-            --net redisnet \
-            --name $(echo $CONTAINER_NAME) \
-            $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            docker run -d -ti -e ADMIN_BOT_API_TOKEN -e PUBLIC_BOT_API_TOKEN -e MONGO_URI -e MONGO_DB_NAME -e AUTH_SERVER_URL -p 80:80 --net redisnet --restart always --name $(echo $CONTAINER_NAME) $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
