@@ -54,7 +54,7 @@ func (b *Bot) initUpdatesChannel(cfg config.BotConfig, webConfig config.WebConfi
 
 		return err
 	} else {
-		// set heroku webhook
+		// set webhook
 		_, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(webConfig.URL, b.bot.Token)))
 		if err != nil {
 			return err
