@@ -3,12 +3,12 @@ main:
   stage: "test"
 
 admin-bot:
-  debug: false
+  debug: true
   timeout: 60
   parse_mode: markdown
 
 public-bot:
-  debug: false
+  debug: true
   timeout: 60
   parse_mode: markdown
   
