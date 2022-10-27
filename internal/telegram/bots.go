@@ -20,11 +20,11 @@ func NewBots(adminBot *Bot, publicBot *Bot) *Bots {
 func (b *Bots) Start(cfg *config.Config) error {
 
 	// init
-	err := b.adminBot.initUpdatesChannel(cfg.AdminBot, cfg.Heroku)
+	err := b.adminBot.initUpdatesChannel(cfg.AdminBot, cfg.Web)
 	if err != nil {
 		return err
 	}
-	err = b.publicBot.initUpdatesChannel(cfg.PublicBot, cfg.Heroku)
+	err = b.publicBot.initUpdatesChannel(cfg.PublicBot, cfg.Web)
 	if err != nil {
 		return err
 	}

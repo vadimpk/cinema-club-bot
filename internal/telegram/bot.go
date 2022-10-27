@@ -41,7 +41,7 @@ func (b *Bot) SetParseMode(parseMode string) {
 	b.parseMode = parseMode
 }
 
-func (b *Bot) initUpdatesChannel(cfg config.BotConfig, herokuConfig config.HerokuConfig) error {
+func (b *Bot) initUpdatesChannel(cfg config.BotConfig, webConfig config.WebConfig) error {
 	// if debug - polling
 	if cfg.Debug {
 		_, _ = b.bot.SetWebhook(tgbotapi.NewWebhook(""))
@@ -55,7 +55,7 @@ func (b *Bot) initUpdatesChannel(cfg config.BotConfig, herokuConfig config.Herok
 		return err
 	} else {
 		// set heroku webhook
-		_, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(herokuConfig.URL, b.bot.Token)))
+		_, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(webConfig.URL, b.bot.Token)))
 		if err != nil {
 			return err
 		}

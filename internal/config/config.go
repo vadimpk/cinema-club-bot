@@ -11,7 +11,7 @@ type (
 		Main      MainConfig
 		AdminBot  BotConfig
 		PublicBot BotConfig
-		Heroku    HerokuConfig
+		Web       WebConfig
 		Redis     RedisConfig
 		Mongo     MongoConfig
 	}
@@ -41,14 +41,14 @@ type (
 		Name string
 	}
 
-	HerokuConfig struct {
-		URL string `mapstructure:"url"`
+	WebConfig struct {
+		URL string
 	}
 )
 
-func Init(configPath string) (*Config, error) {
+func Init(configPath, configsFile string) (*Config, error) {
 
-	if err := parseConfigDir(configPath, os.Getenv("APP_ENV")); err != nil {
+	if err := parseConfigDir(configPath, configsFile); err != nil {
 		return nil, err
 	}
 
@@ -62,9 +62,6 @@ func Init(configPath string) (*Config, error) {
 	if err := viper.UnmarshalKey("public-bot", &cfg.PublicBot); err != nil {
 		return nil, err
 	}
-	if err := viper.UnmarshalKey("heroku", &cfg.Heroku); err != nil {
-		return nil, err
-	}
 	if err := viper.UnmarshalKey("redis", &cfg.Redis); err != nil {
 		return nil, err
 	}
@@ -76,40 +73,34 @@ func Init(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-func parseConfigDir(dir, env string) error {
+func parseConfigDir(dir, file string) error {
 	viper.AddConfigPath(dir)
-	viper.SetConfigName("main")
+	viper.SetConfigName(file)
 
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
-
-	// set additional config file based on environment (local / production)
-	if env == "" {
-		viper.SetConfigName("local")
-	} else {
-		viper.SetConfigName(env)
-	}
-
-	return viper.MergeInConfig()
+	return viper.ReadInConfig()
 }
 
 func parseEnv(cfg *Config) error {
 
-	viper.SetConfigFile(".env")
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
+	if cfg.Main.Environment == "local" {
+		viper.SetConfigFile(".env")
+		if err := viper.ReadInConfig(); err != nil {
+			return err
+		}
 
-	cfg.Mongo.URI = viper.GetString("MONGO_URI")
-	cfg.Mongo.Name = viper.GetString("MONGO_DB_NAME")
-
-	if cfg.Main.Stage == "test" {
+		cfg.Mongo.URI = viper.GetString("MONGO_URI")
+		cfg.Mongo.Name = viper.GetString("MONGO_DB_NAME")
 		cfg.AdminBot.TOKEN = viper.GetString("TEST_ADMIN_BOT_API_TOKEN")
 		cfg.PublicBot.TOKEN = viper.GetString("TEST_PUBLIC_BOT_API_TOKEN")
+
 	} else {
+		cfg.Mongo.URI = os.Getenv("MONGO_URI")
+		cfg.Mongo.Name = os.Getenv("MONGO_DB_NAME")
+
 		cfg.AdminBot.TOKEN = os.Getenv("ADMIN_BOT_API_TOKEN")
 		cfg.PublicBot.TOKEN = os.Getenv("PUBLIC_BOT_API_TOKEN")
+
+		cfg.Web.URL = os.Getenv("AUTH_SERVER-URL")
 	}
 
 	return nil

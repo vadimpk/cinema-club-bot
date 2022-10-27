@@ -1,6 +1,20 @@
+main:
+  environment: "local"
+  stage: "test"
+
 redis:
   url: "localhost"
   port: ":6379"
   password: "redis-test"
   db: 0
   ttl: "720h"
+  
+admin-bot:
+  debug: true
+  timeout: 60
+  parse_mode: markdown
+
+public-bot:
+  debug: true
+  timeout: 60
+  parse_mode: markdown

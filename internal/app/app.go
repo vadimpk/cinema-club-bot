@@ -17,9 +17,9 @@ type PromoCode struct {
 	Code string             `json:"code" bson:"code"`
 }
 
-func Run(configDir string) {
+func Run(configDir, configsFile string) {
 
-	cfg, err := config.Init(configDir)
+	cfg, err := config.Init(configDir, configsFile)
 	if err != nil {
 		log.Fatal(err)
 	}

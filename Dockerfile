@@ -10,9 +10,8 @@ FROM alpine:latest
 
 WORKDIR /root/
 
-COPY --from=0 /github.com/vadimpk/cinema-club-bo/bin/bot .
-COPY --from=0 /github.com/vadimpk/cinema-club-bo/.env .
-COPY --from=0 /github.com/vadimpk/cinema-club-bo/configs configs/
+COPY --from=0 /github.com/vadimpk/cinema-club-bot/bin/bot .
+COPY --from=0 /github.com/vadimpk/cinema-club-bot/configs configs/
 
 EXPOSE 80
 
