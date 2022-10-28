@@ -51,5 +51,11 @@ jobs:
             docker stop $(echo $CONTAINER_NAME)
             # Remove old container
             docker rm $(echo $CONTAINER_NAME)
+            # Set env variables
+            export ADMIN_BOT_API_TOKEN=${{ secrets.ADMIN_BOT_API_TOKEN }}
+            export PUBLIC_BOT_API_TOKEN=${{ secrets.PUBLIC_BOT_API_TOKEN }}
+            export MONGO_URI=${{ secrets.MONGO_URI }}
+            export MONGO_DB_NAME=${{ secrets.MONGO_DB_NAME }}
+            export AUTH_SERVER_URL=${{ secrets.AUTH_SERVER_URL }}
             # Run a new container from a new image
-            docker run -d -ti --env-file .env -p 80:80 --net redisnet --restart always --name $(echo $CONTAINER_NAME) $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+            docker run -d -e ADMIN_BOT_API_TOKEN=ADMIN_BOT_API_TOKEN -e PUBLIC_BOT_API_TOKEN=PUBLIC_BOT_API_TOKEN -e MONGO_URI=MONGO_URI -e MONGO_DB_NAME=MONGO_DB_NAME -e AUTH_SERVER_URL=AUTH_SERVER_URL -p 80:80 --net redisnet --restart always --name $(echo $CONTAINER_NAME) $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
