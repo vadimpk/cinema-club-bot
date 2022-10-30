@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/config"
@@ -41,28 +40,14 @@ func (b *Bot) SetParseMode(parseMode string) {
 	b.parseMode = parseMode
 }
 
-func (b *Bot) initUpdatesChannel(cfg config.BotConfig, webConfig config.WebConfig) error {
-	// if debug - polling
-	if cfg.Debug {
-		_, _ = b.bot.SetWebhook(tgbotapi.NewWebhook(""))
+func (b *Bot) initUpdatesChannel(cfg config.BotConfig) error {
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = cfg.Timeout
 
-		u := tgbotapi.NewUpdate(0)
-		u.Timeout = cfg.Timeout
+	upd, err := b.bot.GetUpdatesChan(u)
+	b.updates = upd
 
-		upd, err := b.bot.GetUpdatesChan(u)
-		b.updates = upd
-
-		return err
-	} else {
-		// set webhook
-		_, err := b.bot.SetWebhook(tgbotapi.NewWebhookWithCert(fmt.Sprintf(webConfig.URL, b.bot.Token), "cert.pem"))
-		if err != nil {
-			return err
-		}
-
-		b.updates = b.bot.ListenForWebhook("/" + b.bot.Token)
-		return nil
-	}
+	return err
 }
 
 func (b *Bot) handleUpdates() {

@@ -11,7 +11,6 @@ type (
 		Main      MainConfig
 		AdminBot  BotConfig
 		PublicBot BotConfig
-		Web       WebConfig
 		Redis     RedisConfig
 		Mongo     MongoConfig
 	}
@@ -39,10 +38,6 @@ type (
 	MongoConfig struct {
 		URI  string
 		Name string
-	}
-
-	WebConfig struct {
-		URL string
 	}
 )
 
@@ -99,8 +94,6 @@ func parseEnv(cfg *Config) error {
 
 		cfg.AdminBot.TOKEN = os.Getenv("ADMIN_BOT_API_TOKEN")
 		cfg.PublicBot.TOKEN = os.Getenv("PUBLIC_BOT_API_TOKEN")
-
-		cfg.Web.URL = os.Getenv("AUTH_SERVER_URL")
 	}
 
 	return nil

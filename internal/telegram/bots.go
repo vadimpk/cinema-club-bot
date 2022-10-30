@@ -4,6 +4,7 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Bots struct {
@@ -19,17 +20,17 @@ func NewBots(adminBot *Bot, publicBot *Bot) *Bots {
 func (b *Bots) Start(cfg *config.Config) error {
 
 	// init
-	err := b.adminBot.initUpdatesChannel(cfg.AdminBot, cfg.Web)
+	err := b.adminBot.initUpdatesChannel(cfg.AdminBot)
 	if err != nil {
 		return err
 	}
-	err = b.publicBot.initUpdatesChannel(cfg.PublicBot, cfg.Web)
+	err = b.publicBot.initUpdatesChannel(cfg.PublicBot)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		err := http.ListenAndServeTLS(cfg.Web.URL, "cert.pem", "key.pem", nil)
+		err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 		if err != nil {
 			log.Println(err)
 		}
