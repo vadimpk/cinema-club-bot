@@ -93,7 +93,7 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageCon
 		case updateEventDescriptionOption:
 			return h.askToEnterData(ctx, message, updateDescriptionState, "Введіть опис події:")
 		case updateEventDateOption:
-			return h.askToEnterData(ctx, message, updateDateState, "Введіть дату події у форматі (день місяць години хвилини пояс), де пояс - часовий пояс (2 або 3 для літнього часу)\n14 10 18 00 2:")
+			return h.askToEnterData(ctx, message, updateDateState, "Введіть дату події у форматі `день місяць години хвилини`\n14 10 18 00:")
 		case updateEventListCapacityOption:
 			return h.askToEnterData(ctx, message, updateListCapacityState, "Введіть кількість вільних місць на подію:")
 		case activateEventOption:

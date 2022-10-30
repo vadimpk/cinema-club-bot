@@ -46,12 +46,9 @@ func (h *Handler) getUpdateEventOptionsKeyboard(event domain.Event, oneTime bool
 	}
 
 	keyboard := tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventNameOption)),
-		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventDescriptionOption)),
-		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventDateOption)),
-		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventListCapacityOption)),
-		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(activationOption)),
-		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(deleteEventOption)),
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventNameOption), tgbotapi.NewKeyboardButton(updateEventDescriptionOption)),
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(updateEventDateOption), tgbotapi.NewKeyboardButton(updateEventListCapacityOption)),
+		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(activationOption), tgbotapi.NewKeyboardButton(deleteEventOption)),
 		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(toMainMenuOption)))
 	keyboard.OneTimeKeyboard = oneTime
 	return keyboard

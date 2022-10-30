@@ -38,7 +38,7 @@ func (e Event) FormatDate() string {
 		minute = "0" + minute
 	}
 
-	return fmt.Sprintf("%s.%s  o  %s:%s", day, month, hour, minute)
+	return fmt.Sprintf("%s.%s o %s:%s", day, month, hour, minute)
 }
 
 func (e Event) Format(list List) string {
@@ -50,5 +50,5 @@ func (e Event) Preview(list List) string {
 }
 
 func (e Event) PreviewForProgram(list List) string {
-	return fmt.Sprintf("*%s*\n%s\nВільних місць: %d\n\n", e.FormatDate(), e.Name, list.Capacity-len(list.List))
+	return fmt.Sprintf("*%s\n%s*\nВільних місць: %d\n\n", e.Name, e.FormatDate(), list.Capacity-len(list.List))
 }

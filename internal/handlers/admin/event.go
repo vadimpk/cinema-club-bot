@@ -189,14 +189,7 @@ func (h *Handler) updateEventDate(event *domain.Event, text string) error {
 	if err != nil {
 		return invalidError
 	}
-	timeZone, err := strconv.Atoi(parts[4])
-	if err != nil {
-		return invalidError
-	}
-	if timeZone < -12 || timeZone > 12 {
-		return invalidError
-	}
-	location := time.FixedZone("UTC"+parts[4], 0)
+	location := time.FixedZone("UTC2", 0)
 
 	date := time.Date(time.Now().Year(), month, day, hour, minute, 0, 0, location)
 
