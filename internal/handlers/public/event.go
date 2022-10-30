@@ -129,7 +129,7 @@ func (h *Handler) getPhoneNumber(ctx context.Context, message *tgbotapi.Message)
 
 	phone := message.Text
 	if len(phone) != 10 || phone == "" || phone[0] != '0' {
-		return []tgbotapi.MessageConfig{tgbotapi.NewMessage(message.Chat.ID, "Неправильний формат номеру")}
+		return []tgbotapi.MessageConfig{tgbotapi.NewMessage(message.Chat.ID, "Неправильний формат номеру, спробуйте ще раз:")}
 	}
 
 	// get name from cache

@@ -54,7 +54,7 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageCon
 	if message.IsCommand() {
 		switch message.Command() {
 		case "start":
-			return h.handleStart(ctx, message, "Виберіть дію:")
+			return h.handleStart(ctx, message, "Привіт!\nЦей бот створено задля перегляду афіші та реєстрації на кінопокази кіноклубу Могилянки :)\nПроблеми з реєстрацією - @vadimpk")
 		case "send":
 			return h.sendMessagesFromAdmin(ctx, message)
 		}
