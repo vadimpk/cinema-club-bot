@@ -165,7 +165,7 @@ func (h *Handler) updateEventDescription(event *domain.Event, text string) error
 func (h *Handler) updateEventDate(event *domain.Event, text string) error {
 	invalidError := errors.New("Ви ввели неправильний формат дати, спробуйте ще раз: ")
 	parts := strings.Split(text, " ")
-	if len(parts) != 5 {
+	if len(parts) != 4 {
 		return invalidError
 	}
 

@@ -50,5 +50,5 @@ func (e Event) Preview(list List) string {
 }
 
 func (e Event) PreviewForProgram(list List) string {
-	return fmt.Sprintf("*%s\n%s*\nВільних місць: %d\n\n", e.Name, e.FormatDate(), list.Capacity-len(list.List))
+	return fmt.Sprintf("*%s*\n%s\nВільних місць: %d\n\n", e.Name, e.FormatDate(), list.Capacity-len(list.List))
 }

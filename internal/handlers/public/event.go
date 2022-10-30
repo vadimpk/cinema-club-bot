@@ -19,7 +19,7 @@ func (h *Handler) seeProgram(ctx context.Context, message *tgbotapi.Message) []t
 	// get events
 	events, err := h.repos.GetActive(ctx)
 	sort.Slice(events, func(i, j int) bool {
-		return events[i].Date.Before(events[j].Date)
+		return events[i].Date.After(events[j].Date)
 	})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

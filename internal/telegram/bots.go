@@ -4,7 +4,6 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"log"
 	"net/http"
-	"os"
 )
 
 type Bots struct {
@@ -30,7 +29,7 @@ func (b *Bots) Start(cfg *config.Config) error {
 	}
 
 	go func() {
-		err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+		err := http.ListenAndServeTLS(cfg.Web.URL, "cert.pem", "key.pem", nil)
 		if err != nil {
 			log.Println(err)
 		}

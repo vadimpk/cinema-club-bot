@@ -100,7 +100,7 @@ func parseEnv(cfg *Config) error {
 		cfg.AdminBot.TOKEN = os.Getenv("ADMIN_BOT_API_TOKEN")
 		cfg.PublicBot.TOKEN = os.Getenv("PUBLIC_BOT_API_TOKEN")
 
-		cfg.Web.URL = os.Getenv("AUTH_SERVER-URL")
+		cfg.Web.URL = os.Getenv("AUTH_SERVER_URL")
 	}
 
 	return nil

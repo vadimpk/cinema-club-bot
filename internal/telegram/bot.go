@@ -55,7 +55,7 @@ func (b *Bot) initUpdatesChannel(cfg config.BotConfig, webConfig config.WebConfi
 		return err
 	} else {
 		// set webhook
-		_, err := b.bot.SetWebhook(tgbotapi.NewWebhook(fmt.Sprintf(webConfig.URL, b.bot.Token)))
+		_, err := b.bot.SetWebhook(tgbotapi.NewWebhookWithCert(fmt.Sprintf(webConfig.URL, b.bot.Token), "cert.pem"))
 		if err != nil {
 			return err
 		}

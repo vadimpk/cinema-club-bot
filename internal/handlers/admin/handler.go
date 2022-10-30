@@ -131,7 +131,7 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageCon
 	case updateDescriptionStateOnCreation:
 		return h.updateEventOnCreation(ctx, message, h.updateEventDescription, updateListCapacityStateOnCreation, "Введіть кількість місць на подію:", false)
 	case updateListCapacityStateOnCreation:
-		return h.updateListOnCreation(ctx, message, h.updateListCapacity, updateDateStateOnCreation, "Введіть дату події у форматі (день місяць години хвилини пояс), де пояс - часовий пояс (2 або 3 для літнього часу)\n14 10 18 00 2:", false)
+		return h.updateListOnCreation(ctx, message, h.updateListCapacity, updateDateStateOnCreation, "Введіть дату події у форматі `день місяць години хвилини`\n14 10 18 00:", false)
 	case updateDateStateOnCreation:
 		return h.updateEventOnCreation(ctx, message, h.updateEventDate, updateDateStateOnCreation, "Подію успішно створено", true)
 	case deleteReservationState:
