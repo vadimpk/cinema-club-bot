@@ -51,6 +51,10 @@ func (r *AdminRepository) ClearAdminMessages(ctx context.Context, chatID string)
 		return err
 	}
 	admin.Messages = nil
-	_, err = r.db.UpdateOne(ctx, bson.M{"chat_id": chatID}, bson.M{"$set": admin})
+	_, err = r.db.DeleteOne(ctx, bson.M{"chat_id": chatID})
+	if err != nil {
+		return err
+	}
+	_, err = r.db.InsertOne(ctx, admin)
 	return err
 }
