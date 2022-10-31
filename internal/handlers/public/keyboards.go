@@ -38,13 +38,13 @@ func (h *Handler) getEventsKeyboard(ctx context.Context, oneTime bool) (tgbotapi
 
 func (h *Handler) getRegisterKeyboard(oneTime bool, list domain.List, chatID string) tgbotapi.ReplyKeyboardMarkup {
 	option := registerOption
+	if len(list.List) >= list.Capacity {
+		option = noSeatsOption
+	}
 	for _, u := range list.List {
 		if u.ChatID == chatID {
 			option = unregisterOption
 		}
-	}
-	if len(list.List) >= list.Capacity {
-		option = noSeatsOption
 	}
 	keyboard := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(option)),

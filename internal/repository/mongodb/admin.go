@@ -50,7 +50,7 @@ func (r *AdminRepository) ClearAdminMessages(ctx context.Context, chatID string)
 	if err != nil {
 		return err
 	}
-	admin.Messages = make([]domain.Message, 0)
+	admin.Messages = nil
 	_, err = r.db.UpdateOne(ctx, bson.M{"chat_id": chatID}, bson.M{"$set": admin})
 	return err
 }
