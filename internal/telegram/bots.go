@@ -1,7 +1,8 @@
 package telegram
 
 import (
-	"github.com/vadimpk/cinema-club-bot/configs"
+	"github.com/vadimpk/cinema-club-bot/config"
+	"github.com/vadimpk/cinema-club-bot/pkg/event"
 	"log"
 	"net/http"
 )
@@ -10,13 +11,21 @@ type Bots struct {
 	adminBot  *Bot
 	publicBot *Bot
 	parseMode string
+	eventBus  event.Bus
 }
 
-func NewBots(adminBot *Bot, publicBot *Bot) *Bots {
-	return &Bots{adminBot: adminBot, publicBot: publicBot}
+func NewBots(adminBot *Bot, publicBot *Bot, bus event.Bus) *Bots {
+	bots := &Bots{adminBot: adminBot, publicBot: publicBot, eventBus: bus}
+
+	err := bus.Subscribe("send messages from admin", bots.publicBot.sendMessagesFromAdmin)
+	if err != nil {
+		log.Fatal("failed to subscribe to event created event", "error", err)
+	}
+
+	return bots
 }
 
-func (b *Bots) Start(cfg *configs.Config) error {
+func (b *Bots) Start(cfg *config.Config) error {
 
 	// init
 	err := b.adminBot.initUpdatesChannel(cfg.AdminBot)

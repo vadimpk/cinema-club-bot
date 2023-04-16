@@ -6,14 +6,16 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
+	"github.com/vadimpk/cinema-club-bot/pkg/event"
 	"github.com/vadimpk/cinema-club-bot/pkg/logging"
 	"strconv"
 )
 
 type Handler struct {
-	cache  cache.Cache
-	repos  repository.Repositories
-	logger logging.Logger
+	cache    cache.Cache
+	repos    repository.Repositories
+	logger   logging.Logger
+	eventBus event.Bus
 }
 
 const (
@@ -39,8 +41,8 @@ const (
 	sendMessageToAllState  = "sending message to all"
 )
 
-func NewHandler(cache cache.Cache, repos repository.Repositories, logger logging.Logger) *Handler {
-	return &Handler{cache: cache, repos: repos, logger: logger}
+func NewHandler(cache cache.Cache, repos repository.Repositories, logger logging.Logger, eventBus event.Bus) *Handler {
+	return &Handler{cache: cache, repos: repos, logger: logger, eventBus: eventBus}
 }
 
 func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageConfig {

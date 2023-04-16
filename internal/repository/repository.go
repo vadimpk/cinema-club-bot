@@ -9,8 +9,6 @@ import (
 type Admins interface {
 	IsAdmin(ctx context.Context, chatID string) bool
 	GetAdmin(ctx context.Context, chatID string) (domain.Admin, error)
-	AddMessagesToAdmin(ctx context.Context, chatID string, messages []domain.Message) error
-	ClearAdminMessages(ctx context.Context, chatID string) error
 }
 
 type Events interface {

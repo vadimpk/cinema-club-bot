@@ -11,7 +11,7 @@ FROM alpine:latest
 WORKDIR /root/
 
 COPY --from=0 /github.com/vadimpk/cinema-club-bot/bin/bot .
-COPY --from=0 /github.com/vadimpk/cinema-club-bot/configs configs/
+COPY --from=0 /github.com/vadimpk/cinema-club-bot/config config/
 
 EXPOSE 80
 

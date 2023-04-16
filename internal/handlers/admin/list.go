@@ -182,10 +182,8 @@ func (h *Handler) deleteReservation(ctx context.Context, message *tgbotapi.Messa
 				ChatID: u.ChatID,
 				Text:   "Вас було видалено з події " + list.EventIdentifier,
 			}}
-			err = h.repos.AddMessagesToAdmin(ctx, convertChatIDToString(message.Chat.ID), messages)
-			if err != nil {
-				return h.goToMainMenu(ctx, message, fmt.Sprintf("Реєстрацію користувача %s видалено, але повідомлення не надішлеться, бо сталася помилка", u.Name))
-			}
+
+			h.eventBus.Publish("send messages from admin", messages)
 			return h.goToMainMenu(ctx, message, fmt.Sprintf("Реєстрацію користувача %s видалено", u.Name))
 		}
 	}
@@ -216,17 +214,15 @@ func (h *Handler) sendMessageToAll(ctx context.Context, message *tgbotapi.Messag
 	if err != nil {
 		return h.errorDB("Unexpected error when getting list: ", err, message.Chat.ID)
 	}
-	messagesToSend := make([]domain.Message, 0)
-	for _, u := range list.List {
-
-		messagesToSend = append(messagesToSend, domain.Message{
+	messagesToSend := make([]domain.Message, len(list.List))
+	for i, u := range list.List {
+		messagesToSend[i] = domain.Message{
 			ChatID: u.ChatID,
 			Text:   message.Text,
-		})
+		}
 	}
-	err = h.repos.AddMessagesToAdmin(ctx, convertChatIDToString(message.Chat.ID), messagesToSend)
-	if err != nil {
-		return h.errorDB("Unexpected error when writing messages", err, message.Chat.ID)
-	}
-	return h.goToMainMenu(ctx, message, fmt.Sprintf("Натисніть команду /send в іншому боті, щоб надіслати %d повідомлень", len(messagesToSend)))
+
+	h.eventBus.Publish("send messages from admin", messagesToSend)
+
+	return h.goToMainMenu(ctx, message, fmt.Sprintf("%d повідомлень буде надіслано в іншому боті", len(messagesToSend)))
 }

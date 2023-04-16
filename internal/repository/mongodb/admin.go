@@ -31,31 +31,3 @@ func (r *AdminRepository) GetAdmin(ctx context.Context, chatID string) (domain.A
 	err := r.db.FindOne(ctx, bson.M{"chat_id": chatID}).Decode(&admin)
 	return admin, err
 }
-
-func (r *AdminRepository) AddMessagesToAdmin(ctx context.Context, chatID string, messages []domain.Message) error {
-	admin, err := r.GetAdmin(ctx, chatID)
-	if err != nil {
-		return err
-	}
-	if admin.Messages == nil {
-		admin.Messages = messages
-	} else {
-		admin.Messages = append(admin.Messages, messages...)
-	}
-	_, err = r.db.UpdateOne(ctx, bson.M{"chat_id": chatID}, bson.M{"$set": admin})
-	return err
-}
-
-func (r *AdminRepository) ClearAdminMessages(ctx context.Context, chatID string) error {
-	admin, err := r.GetAdmin(ctx, chatID)
-	if err != nil {
-		return err
-	}
-	admin.Messages = nil
-	_, err = r.db.DeleteOne(ctx, bson.M{"chat_id": chatID})
-	if err != nil {
-		return err
-	}
-	_, err = r.db.InsertOne(ctx, admin)
-	return err
-}

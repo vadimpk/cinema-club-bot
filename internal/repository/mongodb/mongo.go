@@ -2,7 +2,7 @@ package mongodb
 
 import (
 	"context"
-	"github.com/vadimpk/cinema-club-bot/configs"
+	"github.com/vadimpk/cinema-club-bot/config"
 	"github.com/vadimpk/cinema-club-bot/pkg/logging"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,7 +26,7 @@ func NewRepositories(db *mongo.Database, logger logging.Logger) *Repositories {
 }
 
 // NewClient established connection to a mongoDb instance using provided URI and auth credentials.
-func NewClient(cfg configs.MongoConfig) (*mongo.Client, error) {
+func NewClient(cfg config.MongoConfig) (*mongo.Client, error) {
 
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().

@@ -1,29 +1,21 @@
 package app
 
 import (
-	"github.com/vadimpk/cinema-club-bot/configs"
+	"github.com/vadimpk/cinema-club-bot/config"
 	"github.com/vadimpk/cinema-club-bot/internal/cache/in_memory"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers/admin"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers/public"
 	"github.com/vadimpk/cinema-club-bot/internal/repository/mongodb"
 	"github.com/vadimpk/cinema-club-bot/internal/telegram"
+	"github.com/vadimpk/cinema-club-bot/pkg/event"
 	"github.com/vadimpk/cinema-club-bot/pkg/logging"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type PromoCode struct {
-	ID   primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Code string             `json:"code" bson:"code"`
-}
+func Run() {
 
-func Run(configDir, configsFile string) {
-
-	logger := logging.NewZap("INFO")
-
-	cfg, err := configs.Init(configDir, configsFile)
-	if err != nil {
-		logger.Fatal("failed to init configs", "error", err)
-	}
+	logger := logging.NewZap("info")
+	cfg := config.Get()
+	logger.Info("got config", "cfg", cfg)
 
 	cache := in_memory.NewCache(cfg.Cache.TTL, cfg.Cache.AdminTTL)
 
@@ -32,11 +24,13 @@ func Run(configDir, configsFile string) {
 		logger.Fatal("failed to init mongo client", "error", err)
 	}
 
-	mdb := mongoClient.Database(cfg.Mongo.Name)
+	eventBus := event.NewMsgBus(128)
+
+	mdb := mongoClient.Database(cfg.Mongo.DBName)
 
 	repos := mongodb.NewRepositories(mdb, logger.Named("mongo"))
 
-	adminHandler := admin.NewHandler(cache, repos, logger.Named("admin_handler"))
+	adminHandler := admin.NewHandler(cache, repos, logger.Named("admin_handler"), eventBus)
 	publicHandler := public.NewHandler(cache, repos, logger.Named("public_handler"))
 
 	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler, cache, repos, logger.Named("admin_bot"))
@@ -49,7 +43,7 @@ func Run(configDir, configsFile string) {
 		logger.Fatal("failed to init public bot", "error", err)
 	}
 
-	bots := telegram.NewBots(adminBot, publicBot)
+	bots := telegram.NewBots(adminBot, publicBot, eventBus)
 
 	if err := bots.Start(cfg); err != nil {
 		logger.Fatal("failed to start bots", "error", err)

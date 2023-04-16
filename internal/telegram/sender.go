@@ -2,6 +2,7 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"strings"
 )
 
 var (
@@ -10,6 +11,9 @@ var (
 
 func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) {
 	msg.ParseMode = b.parseMode
+	if msg.ParseMode == "markdown" {
+		msg.Text = replaceReservedCharacters(msg.Text)
+	}
 	_, err := b.bot.Send(msg)
 
 	if err != nil {
@@ -21,10 +25,19 @@ func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) {
 				b.sendMessage(msg)
 			}
 		default:
+			b.logger = b.logger.With("text", msg.Text)
 			_, err := b.bot.Send(msg)
-			b.logger.Error("err", err)
+			if err != nil {
+				b.logger.Error("failed to send message", err)
+			}
 		}
 	}
+}
+
+func replaceReservedCharacters(text string) string {
+	text = strings.ReplaceAll(text, "_", "\\_")
+	text = strings.ReplaceAll(text, "*", "\\*")
+	return text
 }
 
 func split(s string, chunkSize int) []string {

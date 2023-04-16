@@ -2,11 +2,13 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/vadimpk/cinema-club-bot/configs"
+	"github.com/vadimpk/cinema-club-bot/config"
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
+	"github.com/vadimpk/cinema-club-bot/internal/domain"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers"
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
 	"github.com/vadimpk/cinema-club-bot/pkg/logging"
+	"strconv"
 )
 
 type Bot struct {
@@ -23,9 +25,9 @@ func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler, cache cache.Cache, r
 	return &Bot{bot: bot, handler: handler, cache: cache, repository: repository, logger: logger}
 }
 
-func Init(cfg configs.BotConfig, handler handlers.Handler, cache cache.Cache, repository repository.Repositories, logger logging.Logger) (*Bot, error) {
+func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache, repository repository.Repositories, logger logging.Logger) (*Bot, error) {
 
-	bot, err := tgbotapi.NewBotAPI(cfg.TOKEN)
+	bot, err := tgbotapi.NewBotAPI(cfg.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +44,7 @@ func (b *Bot) SetParseMode(parseMode string) {
 	b.parseMode = parseMode
 }
 
-func (b *Bot) initUpdatesChannel(cfg configs.BotConfig) error {
+func (b *Bot) initUpdatesChannel(cfg config.BotConfig) error {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = cfg.Timeout
 
@@ -62,5 +64,19 @@ func (b *Bot) handleUpdates() {
 				b.sendMessage(msg)
 			}
 		}
+	}
+}
+
+func (b *Bot) sendMessagesFromAdmin(msgs []domain.Message) {
+	messagesToSend := make([]tgbotapi.MessageConfig, 0)
+	for _, m := range msgs {
+		chatID, err := strconv.Atoi(m.ChatID)
+		if err == nil {
+			messagesToSend = append(messagesToSend, tgbotapi.NewMessage(int64(chatID), m.Text))
+		}
+	}
+
+	for _, msg := range messagesToSend {
+		b.sendMessage(msg)
 	}
 }
