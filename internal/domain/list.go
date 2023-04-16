@@ -3,6 +3,7 @@ package domain
 import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strings"
 )
 
 type List struct {
@@ -17,5 +18,11 @@ func (l List) Preview() string {
 	for i, u := range l.List {
 		text += fmt.Sprintf("%d. %s\n%s @%s\n", i+1, u.Name, u.Phone, u.Username)
 	}
-	return text + fmt.Sprintf("Всього зареєстровано: %d / %d", len(l.List), l.Capacity)
+	return replaceReservedCharacters(text + fmt.Sprintf("Всього зареєстровано: %d / %d", len(l.List), l.Capacity))
+}
+
+func replaceReservedCharacters(text string) string {
+	text = strings.ReplaceAll(text, "_", "\\_")
+	text = strings.ReplaceAll(text, "*", "\\*")
+	return text
 }
