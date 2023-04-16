@@ -2,7 +2,6 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
 )
 
 var (
@@ -23,7 +22,7 @@ func (b *Bot) sendMessage(msg tgbotapi.MessageConfig) {
 			}
 		default:
 			_, err := b.bot.Send(msg)
-			log.Println(err)
+			b.logger.Error("err", err)
 		}
 	}
 }

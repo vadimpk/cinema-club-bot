@@ -36,7 +36,7 @@ func (h *Handler) chooseUpdateOptions(ctx context.Context, message *tgbotapi.Mes
 	}
 
 	// set identifier to cache
-	err = h.cache.SetIdentifier(ctx, convertChatIDToString(message.Chat.ID), identifier)
+	err = h.cache.SetAdminIdentifier(ctx, convertChatIDToString(message.Chat.ID), identifier)
 	if err != nil {
 		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
 	}

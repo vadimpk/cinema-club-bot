@@ -3,16 +3,17 @@ package admin
 import (
 	"context"
 	"errors"
-	"github.com/go-redis/redis/v9"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
+	"github.com/vadimpk/cinema-club-bot/pkg/logging"
 	"strconv"
 )
 
 type Handler struct {
-	cache cache.Cache
-	repos repository.Repositories
+	cache  cache.Cache
+	repos  repository.Repositories
+	logger logging.Logger
 }
 
 const (
@@ -38,8 +39,8 @@ const (
 	sendMessageToAllState  = "sending message to all"
 )
 
-func NewHandler(cache cache.Cache, repos repository.Repositories) *Handler {
-	return &Handler{cache: cache, repos: repos}
+func NewHandler(cache cache.Cache, repos repository.Repositories, logger logging.Logger) *Handler {
+	return &Handler{cache: cache, repos: repos, logger: logger}
 }
 
 func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageConfig {
@@ -48,17 +49,15 @@ func (h *Handler) HandleMessage(message *tgbotapi.Message) []tgbotapi.MessageCon
 
 	state, err := h.cache.GetAdminState(ctx, chatID)
 	if err != nil {
-		// if state not found try to init admin
-		if err == redis.Nil {
-			err := h.initAdmin(ctx, chatID)
-			// if unable to init admin, return message saying forbidden
-			if err != nil {
-				return []tgbotapi.MessageConfig{tgbotapi.NewMessage(message.Chat.ID, err.Error())}
-			}
-			state = startState
-		} else {
-			return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
+		return h.errorDB("Unexpected error when writing cache:", err, message.Chat.ID)
+	}
+	if state == "" {
+		err := h.initAdmin(ctx, chatID)
+		// if unable to init admin, return message saying forbidden
+		if err != nil {
+			return []tgbotapi.MessageConfig{tgbotapi.NewMessage(message.Chat.ID, err.Error())}
 		}
+		state = startState
 	}
 
 	if message.IsCommand() && message.Command() == "start" {

@@ -1,15 +1,14 @@
 package app
 
 import (
-	"github.com/go-redis/redis/v9"
-	redis2 "github.com/vadimpk/cinema-club-bot/internal/cache/redis"
-	"github.com/vadimpk/cinema-club-bot/internal/config"
+	"github.com/vadimpk/cinema-club-bot/configs"
+	"github.com/vadimpk/cinema-club-bot/internal/cache/in_memory"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers/admin"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers/public"
 	"github.com/vadimpk/cinema-club-bot/internal/repository/mongodb"
 	"github.com/vadimpk/cinema-club-bot/internal/telegram"
+	"github.com/vadimpk/cinema-club-bot/pkg/logging"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
 )
 
 type PromoCode struct {
@@ -19,47 +18,40 @@ type PromoCode struct {
 
 func Run(configDir, configsFile string) {
 
-	log.Println("started application")
+	logger := logging.NewZap("INFO")
 
-	cfg, err := config.Init(configDir, configsFile)
+	cfg, err := configs.Init(configDir, configsFile)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("failed to init configs", "error", err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Redis.URL + cfg.Redis.Port,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
-	})
-
-	cache := redis2.NewCache(rdb, cfg.Redis.TTL)
+	cache := in_memory.NewCache(cfg.Cache.TTL, cfg.Cache.AdminTTL)
 
 	mongoClient, err := mongodb.NewClient(cfg.Mongo)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("failed to init mongo client", "error", err)
 	}
 
 	mdb := mongoClient.Database(cfg.Mongo.Name)
 
-	repos := mongodb.NewRepositories(mdb)
+	repos := mongodb.NewRepositories(mdb, logger.Named("mongo"))
 
-	adminHandler := admin.NewHandler(cache, repos)
-	publicHandler := public.NewHandler(cache, repos)
+	adminHandler := admin.NewHandler(cache, repos, logger.Named("admin_handler"))
+	publicHandler := public.NewHandler(cache, repos, logger.Named("public_handler"))
 
-	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler, cache, repos)
+	adminBot, err := telegram.Init(cfg.AdminBot, adminHandler, cache, repos, logger.Named("admin_bot"))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("failed to init admin bot", "error", err)
 	}
 
-	publicBot, err := telegram.Init(cfg.PublicBot, publicHandler, cache, repos)
+	publicBot, err := telegram.Init(cfg.PublicBot, publicHandler, cache, repos, logger.Named("public_bot"))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("failed to init public bot", "error", err)
 	}
 
 	bots := telegram.NewBots(adminBot, publicBot)
 
 	if err := bots.Start(cfg); err != nil {
-		log.Fatal(err)
+		logger.Fatal("failed to start bots", "error", err)
 	}
-
 }
