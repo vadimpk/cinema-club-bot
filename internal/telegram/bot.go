@@ -9,6 +9,7 @@ import (
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
 	"github.com/vadimpk/cinema-club-bot/pkg/logging"
 	"strconv"
+	"strings"
 )
 
 type Bot struct {
@@ -77,6 +78,13 @@ func (b *Bot) sendMessagesFromAdmin(msgs []domain.Message) {
 	}
 
 	for _, msg := range messagesToSend {
+		msg.Text = replaceReservedCharacters(msg.Text)
 		b.sendMessage(msg)
 	}
+}
+
+func replaceReservedCharacters(text string) string {
+	text = strings.ReplaceAll(text, "_", "\\_")
+	text = strings.ReplaceAll(text, "*", "\\*")
+	return text
 }
