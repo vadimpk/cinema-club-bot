@@ -11,10 +11,11 @@ public-bot:
   debug: false
   timeout: 60
   parse_mode: markdown
+
+http:
+  port: ":8080"
+  timeout: 60
   
-redis:
-  url: "redis-test"
-  port: ":6379"
-  password: "redis-test"
-  db: 0
-  ttl: "72h"
+cache:
+  ttl: "4h"
+  admin_ttl: "720h"

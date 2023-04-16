@@ -1,10 +1,9 @@
 package telegram
 
 import (
-	"github.com/vadimpk/cinema-club-bot/internal/config"
+	"github.com/vadimpk/cinema-club-bot/configs"
 	"log"
 	"net/http"
-	"os"
 )
 
 type Bots struct {
@@ -17,7 +16,7 @@ func NewBots(adminBot *Bot, publicBot *Bot) *Bots {
 	return &Bots{adminBot: adminBot, publicBot: publicBot}
 }
 
-func (b *Bots) Start(cfg *config.Config) error {
+func (b *Bots) Start(cfg *configs.Config) error {
 
 	// init
 	err := b.adminBot.initUpdatesChannel(cfg.AdminBot)
@@ -30,7 +29,8 @@ func (b *Bots) Start(cfg *config.Config) error {
 	}
 
 	go func() {
-		err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+		log.Println("starting http server on port " + cfg.HTTP.Port)
+		err := http.ListenAndServe(cfg.HTTP.Port, nil)
 		if err != nil {
 			log.Println(err)
 		}

@@ -2,10 +2,11 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/vadimpk/cinema-club-bot/configs"
 	"github.com/vadimpk/cinema-club-bot/internal/cache"
-	"github.com/vadimpk/cinema-club-bot/internal/config"
 	"github.com/vadimpk/cinema-club-bot/internal/handlers"
 	"github.com/vadimpk/cinema-club-bot/internal/repository"
+	"github.com/vadimpk/cinema-club-bot/pkg/logging"
 )
 
 type Bot struct {
@@ -15,13 +16,14 @@ type Bot struct {
 	repository repository.Repositories
 	updates    tgbotapi.UpdatesChannel
 	parseMode  string
+	logger     logging.Logger
 }
 
-func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler, cache cache.Cache, repository repository.Repositories) *Bot {
-	return &Bot{bot: bot, handler: handler, cache: cache, repository: repository}
+func NewBot(bot *tgbotapi.BotAPI, handler handlers.Handler, cache cache.Cache, repository repository.Repositories, logger logging.Logger) *Bot {
+	return &Bot{bot: bot, handler: handler, cache: cache, repository: repository, logger: logger}
 }
 
-func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache, repository repository.Repositories) (*Bot, error) {
+func Init(cfg configs.BotConfig, handler handlers.Handler, cache cache.Cache, repository repository.Repositories, logger logging.Logger) (*Bot, error) {
 
 	bot, err := tgbotapi.NewBotAPI(cfg.TOKEN)
 	if err != nil {
@@ -30,7 +32,7 @@ func Init(cfg config.BotConfig, handler handlers.Handler, cache cache.Cache, rep
 
 	bot.Debug = cfg.Debug
 
-	telegramBot := NewBot(bot, handler, cache, repository)
+	telegramBot := NewBot(bot, handler, cache, repository, logger)
 	telegramBot.SetParseMode(cfg.ParseMode)
 
 	return telegramBot, nil
@@ -40,7 +42,7 @@ func (b *Bot) SetParseMode(parseMode string) {
 	b.parseMode = parseMode
 }
 
-func (b *Bot) initUpdatesChannel(cfg config.BotConfig) error {
+func (b *Bot) initUpdatesChannel(cfg configs.BotConfig) error {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = cfg.Timeout
 

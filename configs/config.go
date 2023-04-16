@@ -1,4 +1,4 @@
-package config
+package configs
 
 import (
 	"github.com/spf13/viper"
@@ -11,8 +11,9 @@ type (
 		Main      MainConfig
 		AdminBot  BotConfig
 		PublicBot BotConfig
-		Redis     RedisConfig
 		Mongo     MongoConfig
+		Cache     CacheConfig
+		HTTP      HTTPConfig
 	}
 
 	MainConfig struct {
@@ -27,17 +28,18 @@ type (
 		TOKEN     string
 	}
 
-	RedisConfig struct {
-		URL      string        `mapstructure:"url"`
-		Port     string        `mapstructure:"port"`
-		Password string        `mapstructure:"password"`
-		DB       int           `mapstructure:"db"`
-		TTL      time.Duration `mapstructure:"ttl"`
-	}
-
 	MongoConfig struct {
 		URI  string
 		Name string
+	}
+
+	HTTPConfig struct {
+		Port string `mapstructure:"port"`
+	}
+
+	CacheConfig struct {
+		TTL      time.Duration `mapstructure:"ttl"`
+		AdminTTL time.Duration `mapstructure:"admin_ttl"`
 	}
 )
 
@@ -57,7 +59,10 @@ func Init(configPath, configsFile string) (*Config, error) {
 	if err := viper.UnmarshalKey("public-bot", &cfg.PublicBot); err != nil {
 		return nil, err
 	}
-	if err := viper.UnmarshalKey("redis", &cfg.Redis); err != nil {
+	if err := viper.UnmarshalKey("cache", &cfg.Cache); err != nil {
+		return nil, err
+	}
+	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
 		return nil, err
 	}
 
